@@ -1,0 +1,13 @@
+autopep8==1.6.0
+chardet==4.0.0
+defusedxml==0.7.1
+lml==0.1.0
+odfpy==1.4.1
+psycopg2-binary==2.9.3
+pycodestyle==2.8.0
+pyexcel==0.6.7
+pyexcel-io==0.6.5
+pyexcel-ods==0.6.0
+python-dotenv==0.19.2
+texttable==1.6.4
+toml==0.10.2

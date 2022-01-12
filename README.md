@@ -9,21 +9,13 @@
 
 - Install necessary Python modules via `pip3 install -r requirements.txt`
 
-
 ## Usage
 
-### To download Taric files:
-`python3 download.py`
+### To pull the necessary data from the required ODS files:
+`python3 process.py`
 
-### To retrieve useful information from Taric files for validation purposes:
-`python3 parse.py`
-
-### To build an updated code tree:
-`python3 codes.py`
-- Parameters = date and scope
-- e.g. python3 codes.py 2022-01-01 uk
-- or   python3 codes.py 2022-01-01 eu
-
-### To build current quota position:
-`python3 export_quotas.py uk`
-`python3 export_quotas.py xi`
+### Expected files:
+- Appendix_5A_Union_Document_Code.ods
+- Appendix_5A_National_Document_Codes.ods
+- CHIEF_Doc_codes_2
+- status_codes.csv

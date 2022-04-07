@@ -1,0 +1,3 @@
+- Provide the authorisation decision number for the end use authorisation in the format:
+
+-   - 2 digit code identifying the member state of authorisation, e.g., GB \n\n- - 3 digit code indicating that an end use authorisation is held, i.e., EUS (Authorisation code) \n\n- - followed by the authorisation reference number.\n\n- Use one of the following document [status codes](https://www.gov.uk/government/publications/uk-trade-tariff-document-status-codes-for-harmonised-declarations/uk-trade-tariff-document-status-codes-for-harmonised-declarations): Nodocumentstatuscodeisrequired

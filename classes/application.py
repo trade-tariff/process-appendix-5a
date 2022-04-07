@@ -1,3 +1,4 @@
+from shutil import copyfile
 import os
 import re
 import json
@@ -6,6 +7,7 @@ from pyexcel_ods import get_data
 
 from classes.document_code import DocumentCode
 from classes.database import Database
+from dotenv import load_dotenv
 
 
 class Application(object):
@@ -13,13 +15,20 @@ class Application(object):
         folder = os.getcwd()
         self.source_folder = os.path.join(folder, "resources", "source")
         self.dest_folder = os.path.join(folder, "resources", "dest")
-        self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
-        self.json_output = os.path.join(self.dest_folder, "chief_cds_guidance.json")
+        self.csv_status_codes = os.path.join(
+            self.source_folder, "status_codes.csv")
+        self.json_output = os.path.join(
+            self.dest_folder, "chief_cds_guidance.json")
+
+        load_dotenv('.env')
+        self.cds_national = os.getenv('CDS_NATIONAL_FILE')
+        self.cds_union = os.getenv('CDS_UNION_FILE')
+        self.chief = os.getenv('CHIEF_FILE')
 
         self.filenames = {
-            "cds_national": "Appendix_5A_National_Document_Codes.ods",
-            "cds_union": "Appendix_5A_Union_Document_Code.ods",
-            "chief": "CHIEF_Doc_codes_2.ods"
+            "cds_national": self.cds_national,
+            "cds_union": self.cds_union,
+            "chief": self.chief
         }
         self.setup_replacements_and_abbreviations()
         self.get_used_document_codes()
@@ -41,6 +50,10 @@ class Application(object):
         self.document_codes_national = []
         self.document_codes_union = []
         self.document_codes_chief = []
+
+        self.document_codes_national = {}
+        self.document_codes_union = {}
+        self.document_codes_chief = {}
 
         self.get_file("cds_union")
         self.get_file("cds_national")
@@ -75,40 +88,46 @@ class Application(object):
                             level = ""
 
                         if code != "":
-                            document_code = DocumentCode(
-                                file, code, direction, level, description, guidance, status_codes_cds)
+                            document_code = DocumentCode(file, code, direction, level, description, guidance, status_codes_cds)
 
                             if file == "cds_union":
-                                self.document_codes_union.append(
-                                    document_code.as_dict())
+                                self.document_codes_union[document_code.code] = document_code.as_dict()
                             elif file == "cds_national":
-                                self.document_codes_national.append(
-                                    document_code.as_dict())
+                                self.document_codes_national[document_code.code] = document_code.as_dict()
                             elif file == "chief":
-                                self.document_codes_chief.append(
-                                    document_code.as_dict())
+                                self.document_codes_chief[document_code.code] = document_code.as_dict()
                     row_index += 1
 
     def combine_files(self):
         print("Combining all data sources")
-        self.document_codes_all = self.document_codes_union + self.document_codes_national
+        self.document_codes_all = self.document_codes_union | self.document_codes_national
         for document_code_cds in self.document_codes_all:
-            for document_code_chief in self.document_codes_chief:
-                if document_code_chief["code"] == document_code_cds["code"]:
-                    document_code_cds["guidance_chief"] = document_code_chief["guidance_chief"]
-                    a = 1
-            # document_code["guidance_cds"] = document_code["guidance"]
-            pass
+            try:
+                self.document_codes_all[document_code_cds]["guidance_chief"] = self.document_codes_chief[document_code_cds]["guidance_chief"]
+                a = 1
+            except:
+                self.document_codes_all[document_code_cds]["guidance_chief"] = "No additional information is available."
+                a = 1
+        a = 1
 
     def write_file(self):
         print("Writing output")
         out_file = open(self.json_output, "w")
-        self.out = {}
-        self.out["document_codes"] = self.document_codes_all
-        self.out["status_codes"] = self.status_codes
+        # self.out = {}
+        # self.out["document_codes"] = self.document_codes_all
+        # self.out["status_codes"] = self.status_codes
+        self.out = self.document_codes_all
         # json.dump(self.document_codes_all, out_file, indent=4)
         json.dump(self.out, out_file, indent=4)
         out_file.close()
+
+        # Copy to the OTT prototype
+        dest = "/Users/mattlavis/sites and projects/1. Online Tariff/ott prototype/app/data/appendix-5a/chief_cds_guidance.json"
+        copyfile(self.json_output, dest)
+
+        # Copy to the conditions UI location
+        dest = "/Users/mattlavis/sites and projects/1. Online Tariff/commodity_periods_flask/chief_cds_guidance.json"
+        copyfile(self.json_output, dest)
 
     def check(self, array, index):
         if len(array) > index:
@@ -117,25 +136,32 @@ class Application(object):
             return ""
 
     def get_used_document_codes(self):
-        print("Determining if document codes are used")
+        # We only want to bring in the document codes that are in use
+
+        print("Determining which document codes are used")
         codes = []
         sql = """
         select distinct (mc.certificate_type_code || mc.certificate_code) as code
         from utils.materialized_measures_real_end_dates m, measure_conditions mc 
-        where m.validity_end_date is null 
+        where (m.validity_end_date is null or m.validity_end_date::date > current_date)
         and m.measure_sid = mc.measure_sid 
         and mc.certificate_code is not null
         order by 1;
         """
+
+        # Bring back data from the EU first
         d = Database("eu")
         rows_eu = d.run_query(sql)
         for row in rows_eu:
             codes.append(row[0])
-            a = 1
+
+        # Then bring back data from the UK first
         d = Database("uk")
         rows_uk = d.run_query(sql)
         for row in rows_uk:
             codes.append(row[0])
+
+        # Then combine and de-duplicate them
         codes = list(set(codes))
         self.used_document_codes = sorted(codes)
 
@@ -163,7 +189,7 @@ class Application(object):
             },
             {
                 "from": '\u2022',
-                "to": "-"
+                "to": "\n-"
             },
             {
                 "from": '\u00a0',
@@ -243,7 +269,7 @@ class Application(object):
             },
             {
                 "from": 'posts Sufficient',
-                "to": "posts. Sufficient"
+                "to": "posts.\nSufficient"
             },
             {
                 "from": 'Registered Export Number',
@@ -270,6 +296,10 @@ class Application(object):
                 "to": "."
             },
             {
+                "from": '\(see document status codes for harmonised declarations for definitions\):',
+                "to": ""
+            },
+            {
                 "from": '\(see document status codes for harmonised declarations for definitions\)',
                 "to": ""
             },
@@ -277,6 +307,42 @@ class Application(object):
                 "from": ' \.',
                 "to": "."
             },
+            {
+                "from": 'Use either status code',
+                "to": "Use status code"
+            },
+            {
+                "from": 'e\.g\.,',
+                "to": "e.g."
+            },
+            {
+                "from": 'i\.e\.,',
+                "to": "i.e."
+            },
+            {
+                "from": 'in\\ndocument',
+                "to": "in document"
+            },
+            {
+                "from": 'see\ndocument',
+                "to": "see document"
+            },
+            {
+                "from": 'in. Document',
+                "to": "in Document"
+            },
+            {
+                "from": '- \\n\\n',
+                "to": ""
+            },
+            {
+                "from": "products' Use",
+                "to": "products'. Use"
+            },
+            {
+                "from": ".If",
+                "to": ". If"
+            }
         ]
 
         self.abbreviations = [
@@ -295,6 +361,10 @@ class Application(object):
             {
                 "from": 'ICCAT',
                 "to": "International Commission For The Conservation Of Atlantic Tunas"
+            },
+            {
+                "from": 'IOTC',
+                "to": "Indian Ocean Tuna Commission"
             },
             {
                 "from": 'REACH',

@@ -14,7 +14,7 @@
 ### To pull the necessary data from the required ODS files:
 `python3 process.py`
 
-### Expected files:
+### Expected files (filename do change reguarly):
 - Appendix_5A_Union_Document_Code.ods
 - Appendix_5A_National_Document_Codes.ods
 - CHIEF_Doc_codes_2

@@ -340,8 +340,84 @@ class Application(object):
                 "to": "products'. Use"
             },
             {
-                "from": ".If",
-                "to": ". If"
+                "from": "\.If",
+                "to": "\. If"
+            },
+            {
+                "from": "not held enter",
+                "to": "not held, enter"
+            },
+            {
+                "from": "goods enter",
+                "to": "goods, enter"
+            },
+            {
+                "from": "Ukranian",
+                "to": "Ukrainian"
+            },
+            {
+                "from": "letterss",
+                "to": "letters"
+            },
+            {
+                "from": "Enter:'",
+                "to": "Enter: '"
+            },
+            {
+                "from": "identifers",
+                "to": "identifiers"
+            },
+            {
+                "from": "Identifer",
+                "to": "Identifier"
+            },
+            {
+                "from": "approriate",
+                "to": "appropriate"
+            },
+            {
+                "from": "3 digit",
+                "to": "3-digit"
+            },
+            {
+                "from": "advance.Sufficient",
+                "to": "advance. Sufficient"
+            },
+            {
+                "from": "byt ",
+                "to": "by "
+            },
+            {
+                "from": "constitues",
+                "to": "constitutes"
+            }, 
+            {
+                "from": "numbered range of document cover ",
+                "to": "numbered range of documents covers "
+            },
+            {
+                "from": "exemption'as",
+                "to": "exemption' as"
+            },
+            {
+                "from": "numbered enter the",
+                "to": "numbered, enter the"
+            },
+            {
+                "from": "‘Complete statement",
+                "to": "Complete statement"
+            },
+            {
+                "from": "n - \rComplete",
+                "to": "n - \nComplete"
+            },
+            {
+                "from": "declarations use",
+                "to": "declarations, use"
+            },
+            {
+                "from": "\(see Appendix C10 for definitions\)",
+                "to": ""
             }
         ]
 

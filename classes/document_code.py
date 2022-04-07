@@ -28,17 +28,28 @@ class DocumentCode(object):
         self.used = "Yes" if self.code in g.app.used_document_codes else "No"
 
     def format_all(self):
+        if self.code == "C656":
+            a = 1
+            
         self.code = g.app.cleanse_generic(self.code)
         self.direction = g.app.cleanse_generic(self.direction)
         self.description = g.app.cleanse_generic(self.description)
         self.guidance = g.app.cleanse_generic(self.guidance)
-        
+
         self.guidance = "- " + self.guidance.replace("\n", "\n\n- ") + "\n\n"
         self.guidance = self.guidance.replace("- - ", "\t- ")
         self.guidance = self.guidance.replace("-  - ", "\t- ")
+        self.guidance = self.guidance.replace("\n\t", "\n")
+        
+        
+        self.guidance = self.guidance.replace("- Enter the following", "Enter the following")
+        self.guidance = self.guidance.replace("Enter the following -", "Enter the following:")
 
         self.status_codes_cds = g.app.cleanse_generic(self.status_codes_cds)
         self.status_codes_cds = self.status_codes_cds.rstrip(".")
+
+        if self.code == "C505":
+            self.guidance = self.guidance.replace("- ", "")
 
     def protect(self):
         self.guidance = re.sub(r"Note yyyy.", 'Note yyyytemp_dot', self.guidance)
@@ -53,6 +64,10 @@ class DocumentCode(object):
     def unprotect(self):
         self.guidance = self.guidance.replace('A-T-T', 'ATT')
         self.guidance = self.guidance.replace('- \n\n', '')
+        
+        # Remove \n at the end
+        self.guidance = re.sub(r'\n\n$', '', self.guidance)
+        self.guidance = re.sub(r'\n$', '', self.guidance)
 
     def format_guidance(self):
         # This runs before all the replacements
@@ -66,23 +81,35 @@ class DocumentCode(object):
         self.guidance = re.sub(r' ,', ',', self.guidance)
 
         # Grammar issues
-        self.guidance = re.sub(r'range of certificates cover the goods',
-                               'range of certificates covers the goods,', self.guidance)
-        self.guidance = re.sub(r'range of documents cover the goods',
-                               'range of documents covers the goods,', self.guidance)
+        self.guidance = re.sub(r'range of certificates cover the goods', 'range of certificates covers the goods,', self.guidance)
+        self.guidance = re.sub(r'range of documents cover the goods', 'range of documents covers the goods,', self.guidance)
         self.guidance = re.sub(r'goods insert', 'goods, insert', self.guidance)
-        
+
         # Chief only data replacements
         if self.file == "chief":
             self.guidance = self.guidance.replace("following status codes", "[status codes](" + self.url_5b + ")")
             self.guidance = self.guidance.replace("Use either status code", "Use [status code](" + self.url_5b + ")")
+        
         # Abbreviations
         self.replace_abbreviations()
+        
+    def expand_status_codes(self):
+        for sc in g.app.status_codes:
+            replacement = "\\1<abbr title='{title}'>{status_code}</abbr>\\3".format(
+                    title = g.app.status_codes[sc],
+                    status_code = sc
+                )
+            replacement2 = "\\1<abbr title='{title}'>{status_code}</abbr>".format(
+                    title = g.app.status_codes[sc],
+                    status_code = sc
+                )
+            self.guidance = re.sub(r"(\W)(" + sc + ")(\W)", replacement, self.guidance)
+            self.guidance = re.sub(r"(\W)(" + sc + ")$", replacement2, self.guidance)
 
     def splice_cds_chief(self):
         if self.guidance == "":
             self.guidance = "No additional information is available."
-            
+
         if self.file == "chief":
             self.guidance_chief = self.guidance
         else:
@@ -111,7 +138,7 @@ class DocumentCode(object):
     def format_status_codes(self):
         self.status_codes_cds = self.status_codes_cds.replace("*", " *")
         self.status_codes_cds = self.status_codes_cds.replace("or ", ", ")
-        if self.code == "C046":
+        if self.code == "A030":
             if self.file == "cds_union":
                 a = 1
         addendum = ""
@@ -127,16 +154,25 @@ class DocumentCode(object):
                     addendum = splitter + tmp[1]
                 self.status_codes_cds = self.status_codes_cds.replace(" ", "")
                 self.status_codes_cds = self.status_codes_cds.split(",")
+                
+                if len(self.status_codes_cds) == 1:
+                    if self.status_codes_cds[0] == "":
+                        self.status_codes_cds = []
+                
                 if len(self.status_codes_cds) == 1:
                     self.guidance += "\n- Use the following [document status code](" + self.url_5b + "): "
+                elif len(self.status_codes_cds) == 0:
+                    pass
                 else:
                     self.guidance += "\n- Use one of the following [document status codes](" + self.url_5b + "): "
-                
+
                 for c in self.status_codes_cds:
                     c = c.strip()
                     self.guidance += c + ", "
-                
+
             self.guidance = self.guidance.strip()
             self.guidance = self.guidance.strip(",")
             self.guidance += addendum
             self.guidance = self.guidance.replace("\n\n\n", "\n\n")
+
+        self.expand_status_codes()

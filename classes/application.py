@@ -4,6 +4,8 @@ import re
 import json
 import csv
 from pyexcel_ods import get_data
+import os
+from glob import glob
 
 from classes.document_code import DocumentCode
 from classes.database import Database
@@ -30,9 +32,9 @@ class Application(object):
             "cds_union": self.cds_union,
             "chief": self.chief
         }
-        self.setup_replacements_and_abbreviations()
-        self.get_used_document_codes()
-        self.get_status_codes()
+        # self.setup_replacements_and_abbreviations()
+        # self.get_used_document_codes()
+        # self.get_status_codes()
 
     def get_status_codes(self):
         print("Getting status codes")
@@ -47,9 +49,9 @@ class Application(object):
         a = 1
 
     def get_data(self):
-        self.document_codes_national = []
-        self.document_codes_union = []
-        self.document_codes_chief = []
+        # self.document_codes_national = []
+        # self.document_codes_union = []
+        # self.document_codes_chief = []
 
         self.document_codes_national = {}
         self.document_codes_union = {}
@@ -104,10 +106,10 @@ class Application(object):
         for document_code_cds in self.document_codes_all:
             try:
                 self.document_codes_all[document_code_cds]["guidance_chief"] = self.document_codes_chief[document_code_cds]["guidance_chief"]
-                a = 1
+                self.document_codes_all[document_code_cds]["applies_to_chief"] = True
             except:
-                self.document_codes_all[document_code_cds]["guidance_chief"] = "No additional information is available."
-                a = 1
+                # self.document_codes_all[document_code_cds]["guidance_chief"] = "No additional information is available."
+                self.document_codes_all[document_code_cds]["guidance_chief"] = "This document code is available on CDS only."
         a = 1
 
     def write_file(self):
@@ -454,3 +456,30 @@ class Application(object):
             s = re.sub(replacement["from"], replacement["to"], s)
         s = re.sub(" +", " ", s)
         return s.strip()
+
+    def check_article_references(self):
+        missing = []
+        okay_words = [
+            "tolerances.md",
+            "originating_import.md",
+            "originating_export.md"
+        ]
+        folder = "/Users/mattlavis/sites and projects/1. Online Tariff/ott prototype/app/data/roo/uk/articles"
+        results = [y for x in os.walk(folder) for y in glob(os.path.join(x[0], '*.md'))]
+        results.sort()
+        a = 1
+        for result in results:
+            tmp = result.split("/")
+            filename = tmp[len(tmp) - 1]
+            if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
+                f = open(result, "r")
+                content = f.read()
+                if "{{ Article" not in content:
+                    missing.append(result)
+                    a = 1
+                
+        missing_text = "\n".join(missing)
+        file = "missing.txt"
+        f = open(file, "w")
+        f.write(missing_text)
+        f.close()

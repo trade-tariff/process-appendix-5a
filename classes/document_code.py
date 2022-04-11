@@ -14,6 +14,7 @@ class DocumentCode(object):
 
         self.guidance_cds = ""
         self.guidance_chief = ""
+        self.applies_to_chief = False
         self.url_5b = "https://www.gov.uk/government/publications/uk-trade-tariff-document-status-codes-for-harmonised-declarations/uk-trade-tariff-document-status-codes-for-harmonised-declarations"
 
         self.protect()
@@ -129,6 +130,7 @@ class DocumentCode(object):
             "description": self.description,
             "guidance_cds": self.guidance_cds,
             "guidance_chief": self.guidance_chief,
+            "applies_to_chief": self.applies_to_chief,
             "status_codes_cds": self.status_codes_cds,
             "used": self.used
         }

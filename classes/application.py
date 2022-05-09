@@ -471,7 +471,8 @@ class Application(object):
         for result in results:
             tmp = result.split("/")
             filename = tmp[len(tmp) - 1]
-            if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
+            if filename not in okay_words and "common" not in result:
+            # if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
                 f = open(result, "r")
                 content = f.read()
                 if "{{ Article" not in content:

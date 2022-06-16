@@ -124,15 +124,20 @@ class DocumentCode(object):
                 item["from"], "<abbr title='" + item["to"] + "'>" + item["from"] + "</abbr>")
 
     def as_dict(self):
+        # Removed a lot of old content
+        # ret = {
+        #     "code": self.code,
+        #     "direction": self.direction,
+        #     "description": self.description,
+        #     "guidance_cds": self.guidance_cds,
+        #     "guidance_chief": self.guidance_chief,
+        #     "applies_to_chief": self.applies_to_chief,
+        #     "status_codes_cds": self.status_codes_cds,
+        #     "used": self.used
+        # }
         ret = {
-            "code": self.code,
-            "direction": self.direction,
-            "description": self.description,
             "guidance_cds": self.guidance_cds,
             "guidance_chief": self.guidance_chief,
-            "applies_to_chief": self.applies_to_chief,
-            "status_codes_cds": self.status_codes_cds,
-            "used": self.used
         }
 
         return ret

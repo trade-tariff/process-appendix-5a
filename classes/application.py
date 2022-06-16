@@ -17,15 +17,19 @@ class Application(object):
         folder = os.getcwd()
         self.source_folder = os.path.join(folder, "resources", "source")
         self.dest_folder = os.path.join(folder, "resources", "dest")
-        self.csv_status_codes = os.path.join(
-            self.source_folder, "status_codes.csv")
-        self.json_output = os.path.join(
-            self.dest_folder, "chief_cds_guidance.json")
+        self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
+        self.json_output = os.path.join(self.dest_folder, "chief_cds_guidance.json")
 
         load_dotenv('.env')
+
+        # Source files
         self.cds_national = os.getenv('CDS_NATIONAL_FILE')
         self.cds_union = os.getenv('CDS_UNION_FILE')
         self.chief = os.getenv('CHIEF_FILE')
+        
+        # Dest files
+        self.DEST_FILE = os.getenv('DEST_FILE')
+        self.PROTOTYPE_DEST_FILE = os.getenv('PROTOTYPE_DEST_FILE')
 
         self.filenames = {
             "cds_national": self.cds_national,
@@ -61,6 +65,7 @@ class Application(object):
         self.get_file("cds_national")
         self.get_file("chief")
 
+    def write_json(self):
         self.combine_files()
         self.write_file()
 
@@ -106,30 +111,24 @@ class Application(object):
         for document_code_cds in self.document_codes_all:
             try:
                 self.document_codes_all[document_code_cds]["guidance_chief"] = self.document_codes_chief[document_code_cds]["guidance_chief"]
-                self.document_codes_all[document_code_cds]["applies_to_chief"] = True
+                # self.document_codes_all[document_code_cds]["applies_to_chief"] = True
             except:
-                # self.document_codes_all[document_code_cds]["guidance_chief"] = "No additional information is available."
                 self.document_codes_all[document_code_cds]["guidance_chief"] = "This document code is available on CDS only."
+                pass
         a = 1
 
     def write_file(self):
         print("Writing output")
         out_file = open(self.json_output, "w")
-        # self.out = {}
-        # self.out["document_codes"] = self.document_codes_all
-        # self.out["status_codes"] = self.status_codes
         self.out = self.document_codes_all
-        # json.dump(self.document_codes_all, out_file, indent=4)
         json.dump(self.out, out_file, indent=4)
         out_file.close()
 
         # Copy to the OTT prototype
-        dest = "/Users/mattlavis/sites and projects/1. Online Tariff/ott prototype/app/data/appendix-5a/chief_cds_guidance.json"
-        copyfile(self.json_output, dest)
+        copyfile(self.json_output, self.DEST_FILE)
 
         # Copy to the conditions UI location
-        dest = "/Users/mattlavis/sites and projects/1. Online Tariff/commodity_periods_flask/chief_cds_guidance.json"
-        copyfile(self.json_output, dest)
+        copyfile(self.json_output, self.PROTOTYPE_DEST_FILE)
 
     def check(self, array, index):
         if len(array) > index:
@@ -392,7 +391,7 @@ class Application(object):
             {
                 "from": "constitues",
                 "to": "constitutes"
-            }, 
+            },
             {
                 "from": "numbered range of document cover ",
                 "to": "numbered range of documents covers "
@@ -472,13 +471,13 @@ class Application(object):
             tmp = result.split("/")
             filename = tmp[len(tmp) - 1]
             if filename not in okay_words and "common" not in result:
-            # if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
+                # if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
                 f = open(result, "r")
                 content = f.read()
                 if "{{ Article" not in content:
                     missing.append(result)
                     a = 1
-                
+
         missing_text = "\n".join(missing)
         file = "missing.txt"
         f = open(file, "w")

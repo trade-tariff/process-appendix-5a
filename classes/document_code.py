@@ -20,18 +20,30 @@ class DocumentCode(object):
         self.protect()
         self.format_guidance()
         self.format_all()
+        self.get_overlays()
         self.check_if_used()
         self.format_status_codes()
         self.unprotect()
         self.splice_cds_chief()
+        
+    def get_overlays(self):
+        self.get_overlays_cds()
+        self.get_overlays_chief()
+        
+    def get_overlays_cds(self):
+        self.has_overlay = False
+        if self.file != "chief":
+            if self.code in g.app.overlays:
+                self.has_overlay = True
+                self.guidance = g.app.overlays[self.code]
+        
+    def get_overlays_chief(self):
+        return
 
     def check_if_used(self):
         self.used = "Yes" if self.code in g.app.used_document_codes else "No"
 
     def format_all(self):
-        if self.code == "C656":
-            a = 1
-            
         self.code = g.app.cleanse_generic(self.code)
         self.direction = g.app.cleanse_generic(self.direction)
         self.description = g.app.cleanse_generic(self.description)
@@ -143,6 +155,9 @@ class DocumentCode(object):
         return ret
 
     def format_status_codes(self):
+        if self.has_overlay:
+            return
+
         self.status_codes_cds = self.status_codes_cds.replace("*", " *")
         self.status_codes_cds = self.status_codes_cds.replace("or ", ", ")
         if self.code == "A030":

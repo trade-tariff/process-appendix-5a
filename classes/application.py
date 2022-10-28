@@ -18,6 +18,10 @@ class Application(object):
         self.source_folder = os.path.join(folder, "resources", "source")
         self.dest_folder = os.path.join(folder, "resources", "dest")
         self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
+        self.overlay_folder = os.path.join(folder, "resources", "overlays")
+        self.overlay_folder_cds = os.path.join(folder, self.overlay_folder, "cds")
+        self.overlay_folder_chief = os.path.join(folder, self.overlay_folder, "chief")
+
         self.json_output = os.path.join(self.dest_folder, "chief_cds_guidance.json")
 
         load_dotenv('.env')
@@ -483,3 +487,20 @@ class Application(object):
         f = open(file, "w")
         f.write(missing_text)
         f.close()
+
+    def get_overlays(self):
+        path = os.path.join(self.overlay_folder_cds, "*.md")
+        md_files = []
+        for file in glob(path):
+            md_files.append(file)
+
+        md_files.sort()
+        self.overlays = {}
+        for file in md_files:
+            document_code = file.replace(".md", "")
+            document_code = document_code.replace(self.overlay_folder_cds, "")
+            document_code = document_code.replace("/", "")
+            f = open(file, "r")
+            contents = f.read()
+            self.overlays[document_code] = contents
+        a = 1

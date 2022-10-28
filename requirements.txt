@@ -1,7 +1,9 @@
+autopep8==1.7.0
 defusedxml==0.7.1
 lml==0.1.0
 odfpy==1.4.1
-pycodestyle==2.8.0
+psycopg2-binary==2.9.3
+pycodestyle==2.9.1
 pyexcel-io==0.6.5
 pyexcel-ods==0.6.0
 python-dotenv==0.19.2

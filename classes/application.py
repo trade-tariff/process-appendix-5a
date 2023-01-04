@@ -145,23 +145,31 @@ class Application(object):
 
         print("Determining which document codes are used")
         codes = []
+
+        # Bring back data from the EU first
+        d = Database("eu")
         sql = """
         select distinct (mc.certificate_type_code || mc.certificate_code) as code
         from utils.materialized_measures_real_end_dates m, measure_conditions mc 
-        where (m.validity_end_date is null or m.validity_end_date::date > current_date)
+        where (m.validity_end_date is null or m.validity_end_date::date > (current_date - 365))
         and m.measure_sid = mc.measure_sid 
         and mc.certificate_code is not null
         order by 1;
         """
-
-        # Bring back data from the EU first
-        d = Database("eu")
         rows_eu = d.run_query(sql)
         for row in rows_eu:
             codes.append(row[0])
 
         # Then bring back data from the UK first
         d = Database("uk")
+        sql = """
+        select distinct (mc.certificate_type_code || mc.certificate_code) as code
+        from utils.materialized_measures_real_end_dates m, measure_conditions mc 
+        where (m.validity_start_date >= '2021-01-01')
+        and m.measure_sid = mc.measure_sid 
+        and mc.certificate_code is not null
+        order by 1;
+        """
         rows_uk = d.run_query(sql)
         for row in rows_uk:
             codes.append(row[0])

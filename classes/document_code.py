@@ -136,17 +136,6 @@ class DocumentCode(object):
                 item["from"], "<abbr title='" + item["to"] + "'>" + item["from"] + "</abbr>")
 
     def as_dict(self):
-        # Removed a lot of old content
-        # ret = {
-        #     "code": self.code,
-        #     "direction": self.direction,
-        #     "description": self.description,
-        #     "guidance_cds": self.guidance_cds,
-        #     "guidance_chief": self.guidance_chief,
-        #     "applies_to_chief": self.applies_to_chief,
-        #     "status_codes_cds": self.status_codes_cds,
-        #     "used": self.used
-        # }
         ret = {
             "guidance_cds": self.guidance_cds,
             "guidance_chief": self.guidance_chief,
@@ -160,9 +149,6 @@ class DocumentCode(object):
 
         self.status_codes_cds = self.status_codes_cds.replace("*", " *")
         self.status_codes_cds = self.status_codes_cds.replace("or ", ", ")
-        if self.code == "A030":
-            if self.file == "cds_union":
-                a = 1
         addendum = ""
         if self.file != "chief":
             if "No status code is required" in self.status_codes_cds or "No document status code is required" in self.status_codes_cds:

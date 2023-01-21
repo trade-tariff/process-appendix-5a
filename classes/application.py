@@ -1,66 +1,79 @@
+import requests
+from bs4 import BeautifulSoup
 from shutil import copyfile
+from datetime import date
 import os
+import sys
 import re
 import json
 import csv
 from pyexcel_ods import get_data
 import os
 from glob import glob
+from dotenv import load_dotenv
 
 from classes.document_code import DocumentCode
 from classes.database import Database
-from dotenv import load_dotenv
-
+import classes.functions as func
 
 class Application(object):
     def __init__(self):
-        folder = os.getcwd()
-        self.source_folder = os.path.join(folder, "resources", "source")
-        self.dest_folder = os.path.join(folder, "resources", "dest")
-        self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
-        self.overlay_folder = os.path.join(folder, "resources", "overlays")
-        self.overlay_folder_cds = os.path.join(folder, self.overlay_folder, "cds")
-        self.overlay_folder_chief = os.path.join(folder, self.overlay_folder, "chief")
 
+        self.resources_folder = os.path.join(os.getcwd(), "resources")
+        self.source_folder = os.path.join(self.resources_folder, "01. source")
+        self.overlay_folder = os.path.join(self.resources_folder, "02. overlays")
+        self.dest_folder = os.path.join(self.resources_folder, "03. dest")
+        self.codes_folder = os.path.join(self.resources_folder, "04. codes")
+        self.missing_folder = os.path.join(self.resources_folder, "05. missing")
+        self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
+        
+        func.make_folder(self.resources_folder)
+        func.make_folder(self.source_folder)
+        func.make_folder(self.overlay_folder)
+        func.make_folder(self.dest_folder)
+        func.make_folder(self.codes_folder)
+        func.make_folder(self.missing_folder)
+
+        self.overlay_folder_cds = os.path.join(self.overlay_folder, "cds")
+        self.overlay_folder_chief = os.path.join(self.overlay_folder, "chief")
+
+        d = self.get_today_string()
         self.json_output = os.path.join(self.dest_folder, "chief_cds_guidance.json")
+        self.dated_folder = os.path.join(self.dest_folder, d)
+        try:
+            os.mkdir(self.dated_folder)
+        except Exception as e:
+            pass
+        self.json_output2 = os.path.join(self.dated_folder, "chief_cds_guidance_{d}.json".format(d=d))
 
         load_dotenv('.env')
 
         # Source files
-        self.cds_national = os.getenv('CDS_NATIONAL_FILE')
-        self.cds_union = os.getenv('CDS_UNION_FILE')
+        self.cds_national = ""
+        self.cds_union = ""
         self.chief = os.getenv('CHIEF_FILE')
-        
+
+        # URLs
+        self.url_union = os.getenv('URL_UNION')
+        self.url_national = os.getenv('URL_NATIONAL')
+
         # Dest files
         self.DEST_FILE = os.getenv('DEST_FILE')
         self.PROTOTYPE_DEST_FILE = os.getenv('PROTOTYPE_DEST_FILE')
 
-        self.filenames = {
-            "cds_national": self.cds_national,
-            "cds_union": self.cds_union,
-            "chief": self.chief
-        }
-        # self.setup_replacements_and_abbreviations()
-        # self.get_used_document_codes()
-        # self.get_status_codes()
+        self.codes_on_govuk = []
 
     def get_status_codes(self):
         print("Getting status codes")
         self.status_codes = {}
         with open(self.csv_status_codes) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
-            line_count = 0
             for row in csv_reader:
                 status_code = row[0]
                 description = self.cleanse_generic(row[1])
                 self.status_codes[status_code] = description
-        a = 1
 
     def get_data(self):
-        # self.document_codes_national = []
-        # self.document_codes_union = []
-        # self.document_codes_chief = []
-
         self.document_codes_national = {}
         self.document_codes_union = {}
         self.document_codes_chief = {}
@@ -68,6 +81,20 @@ class Application(object):
         self.get_file("cds_union")
         self.get_file("cds_national")
         self.get_file("chief")
+        self.codes_on_govuk.sort()
+
+        self.compare_govuk_with_database()
+
+    def compare_govuk_with_database(self):
+        self.missing = []
+        for code in self.used_document_codes:
+            if code not in self.codes_on_govuk:
+                self.missing.append({code: self.code_dict[code]})
+
+        filename = "missing-{date}.json".format(date=self.get_today_string())
+        filename = os.path.join(self.missing_folder, filename)
+        with open(filename, 'w') as f:
+            json.dump(self.missing, f, indent=4)
 
     def write_json(self):
         self.combine_files()
@@ -107,6 +134,9 @@ class Application(object):
                                 self.document_codes_national[document_code.code] = document_code.as_dict()
                             elif file == "chief":
                                 self.document_codes_chief[document_code.code] = document_code.as_dict()
+
+                            if code not in self.codes_on_govuk:
+                                self.codes_on_govuk.append(code)
                     row_index += 1
 
     def combine_files(self):
@@ -119,7 +149,6 @@ class Application(object):
             except:
                 self.document_codes_all[document_code_cds]["guidance_chief"] = "This document code is available on CDS only."
                 pass
-        a = 1
 
     def write_file(self):
         print("Writing output")
@@ -134,6 +163,9 @@ class Application(object):
         # Copy to the conditions UI location
         copyfile(self.json_output, self.PROTOTYPE_DEST_FILE)
 
+        # Copy to the dated folder
+        copyfile(self.json_output, self.json_output2)
+
     def check(self, array, index):
         if len(array) > index:
             return str(array[index])
@@ -141,42 +173,68 @@ class Application(object):
             return ""
 
     def get_used_document_codes(self):
-        # We only want to bring in the document codes that are in use
-
-        print("Determining which document codes are used")
+        # We only want to bring in the document codes that have been in use within the last x days
+        print("Determining which document codes are used\n")
         codes = []
+        self.code_dict = {}
 
         # Bring back data from the EU first
         d = Database("eu")
+        day_interval = 183
         sql = """
-        select distinct (mc.certificate_type_code || mc.certificate_code) as code
-        from utils.materialized_measures_real_end_dates m, measure_conditions mc 
-        where (m.validity_end_date is null or m.validity_end_date::date > (current_date - 365))
-        and m.measure_sid = mc.measure_sid 
+        select distinct (mc.certificate_type_code || mc.certificate_code) as code, c.description 
+        from utils.materialized_measures_real_end_dates m, measure_conditions mc,
+        utils.materialized_certificates c
+        where (m.validity_end_date is null or m.validity_end_date::date > (current_date - %s))
+        and m.measure_sid = mc.measure_sid
+        and mc.certificate_type_code = c.certificate_type_code 
+        and mc.certificate_code = c.certificate_code 
+        and m.measure_type_id < 'AAA'
         and mc.certificate_code is not null
         order by 1;
         """
-        rows_eu = d.run_query(sql)
+        print("- Checking the XI tariff")
+        rows_eu = d.run_query(sql, [day_interval])
         for row in rows_eu:
             codes.append(row[0])
+            self.code_dict[row[0]] = row[1]
 
         # Then bring back data from the UK first
         d = Database("uk")
         sql = """
-        select distinct (mc.certificate_type_code || mc.certificate_code) as code
-        from utils.materialized_measures_real_end_dates m, measure_conditions mc 
-        where (m.validity_start_date >= '2021-01-01')
-        and m.measure_sid = mc.measure_sid 
+        select distinct (mc.certificate_type_code || mc.certificate_code) as code, c.description 
+        from utils.materialized_measures_real_end_dates m, measure_conditions mc,
+        utils.materialized_certificates c
+        where (m.validity_end_date is null or m.validity_end_date::date > (current_date - %s))
+        and m.measure_sid = mc.measure_sid
+        and mc.certificate_type_code = c.certificate_type_code 
+        and mc.certificate_code = c.certificate_code 
+        and m.measure_type_id < 'AAA'
         and mc.certificate_code is not null
         order by 1;
         """
-        rows_uk = d.run_query(sql)
+        print("- Checking the UK tariff\n")
+        rows_uk = d.run_query(sql, [day_interval])
         for row in rows_uk:
             codes.append(row[0])
+            self.code_dict[row[0]] = row[1].replace('"', "'")
 
         # Then combine and de-duplicate them
         codes = list(set(codes))
         self.used_document_codes = sorted(codes)
+        self.write_used_codes()
+
+    def get_today_string(self):
+        return date.today().strftime("%Y-%m-%d")
+
+    def write_used_codes(self):
+        filename = "codes-{date}.csv".format(date=self.get_today_string())
+        filename = os.path.join(os.getcwd(), self.codes_folder, filename)
+        with open(filename, 'w') as f:
+            f.write('"Code", "Description"\n')
+            for code in self.used_document_codes:
+                f.write('"' + code + '", "' + self.code_dict[code] + '"\n')
+        f.close()
 
     def setup_replacements_and_abbreviations(self):
         self.replacements = [
@@ -468,34 +526,6 @@ class Application(object):
         s = re.sub(" +", " ", s)
         return s.strip()
 
-    def check_article_references(self):
-        missing = []
-        okay_words = [
-            "tolerances.md",
-            "originating_import.md",
-            "originating_export.md"
-        ]
-        folder = "/Users/mattlavis/sites and projects/1. Online Tariff/ott prototype/app/data/roo/uk/articles"
-        results = [y for x in os.walk(folder) for y in glob(os.path.join(x[0], '*.md'))]
-        results.sort()
-        a = 1
-        for result in results:
-            tmp = result.split("/")
-            filename = tmp[len(tmp) - 1]
-            if filename not in okay_words and "common" not in result:
-                # if filename not in okay_words and "common" not in result and "gsp" not in result and "oct" not in result:
-                f = open(result, "r")
-                content = f.read()
-                if "{{ Article" not in content:
-                    missing.append(result)
-                    a = 1
-
-        missing_text = "\n".join(missing)
-        file = "missing.txt"
-        f = open(file, "w")
-        f.write(missing_text)
-        f.close()
-
     def get_overlays(self):
         path = os.path.join(self.overlay_folder_cds, "*.md")
         md_files = []
@@ -511,4 +541,33 @@ class Application(object):
             f = open(file, "r")
             contents = f.read()
             self.overlays[document_code] = contents
-        a = 1
+
+    def get_ods_files(self):
+        self.cds_national = self.get_ods_file(self.url_national, "national.ods")
+        self.cds_union = self.get_ods_file(self.url_union, "union.ods")
+
+        self.filenames = {
+            "cds_national": self.cds_national,
+            "cds_union": self.cds_union,
+            "chief": self.chief
+        }
+
+    def get_ods_file(self, url, dest):
+        dated_folder = os.path.join(self.source_folder, self.get_today_string())
+        if not os.path.exists(dated_folder):
+            os.mkdir(dated_folder)
+        request = requests.get(url)
+        soup = BeautifulSoup(request.text, 'lxml')
+        href_tags = ["xh1", "xh2", "xh3", "a"]
+        for tag in soup.find_all(href_tags):
+            href = tag.attrs["href"]
+            if ".ods" in href:
+                r = requests.get(href)
+                filename = os.path.join(self.source_folder, "latest", dest)
+                with open(filename, 'wb') as f:
+                    f.write(r.content)
+                filename2 = os.path.join(dated_folder, dest)
+                copyfile(filename, filename2)
+                break
+
+        return filename2

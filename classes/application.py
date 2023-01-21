@@ -14,7 +14,9 @@ from dotenv import load_dotenv
 
 from classes.document_code import DocumentCode
 from classes.database import Database
+from classes.excel import Excel
 import classes.functions as func
+
 
 class Application(object):
     def __init__(self):
@@ -26,7 +28,7 @@ class Application(object):
         self.codes_folder = os.path.join(self.resources_folder, "04. codes")
         self.missing_folder = os.path.join(self.resources_folder, "05. missing")
         self.csv_status_codes = os.path.join(self.source_folder, "status_codes.csv")
-        
+
         func.make_folder(self.resources_folder)
         func.make_folder(self.source_folder)
         func.make_folder(self.overlay_folder)
@@ -83,18 +85,85 @@ class Application(object):
         self.get_file("chief")
         self.codes_on_govuk.sort()
 
-        self.compare_govuk_with_database()
-
     def compare_govuk_with_database(self):
         self.missing = []
+        self.missing_codes = []
         for code in self.used_document_codes:
             if code not in self.codes_on_govuk:
                 self.missing.append({code: self.code_dict[code]})
+                self.missing_codes.append(code)
+
+        self.get_codes_related_to_missing_document_codes()
 
         filename = "missing-{date}.json".format(date=self.get_today_string())
         filename = os.path.join(self.missing_folder, filename)
         with open(filename, 'w') as f:
             json.dump(self.missing, f, indent=4)
+
+    def get_codes_related_to_missing_document_codes(self):
+        print("\nGetting examples of where missing certificates apply\n")
+        codes = ",".join(self.missing_codes)
+        t = tuple(self.missing_codes)
+        sql = "select 'xi' as scope, c.code, m.goods_nomenclature_item_id, \
+        m.geographical_area_id, ga.description as geographical_area_description, \
+        m.measure_type_id, mt.description as measure_type_description, mt.direction \
+        from utils.measures_real_end_dates m, measure_conditions mc, utils.materialized_certificates c, \
+        utils.measure_types mt, utils.geographical_areas ga \
+        where m.measure_sid = mc.measure_sid \
+        and mc.certificate_type_code = c.certificate_type_code \
+        and m.measure_type_id = mt.measure_type_id \
+        and m.geographical_area_sid = ga.geographical_area_sid \
+        and mc.certificate_code = c.certificate_code \
+        and c.code in {codes} \
+        and (m.validity_end_date is null or m.validity_end_date::date > current_date) \
+        order by 2, 3, 6, 4;"
+        sql = sql.format(codes=t)
+
+        # Get EU matching commodities
+        print("- Checking XI database")
+        d = Database("eu")
+        rows_eu = d.run_query(sql)
+
+        # Get UK matching commodities
+        sql = sql.replace("xi", "uk")
+        print("- Checking UK database\n")
+        d = Database("uk")
+        rows_uk = d.run_query(sql)
+        rows = rows_eu + rows_uk
+        excel = Excel()
+        filename = "missing_document_codes-{date}.xlsx".format(date=self.get_today_string())
+        excel.create_excel(self.missing_folder, filename)
+        sheet = excel.add_worksheet("document codes")
+        data = ('Document code', 'Description')
+        sheet.write_row('A1', data, excel.format_bold)
+        sheet.set_column(0, 0, 20)
+        sheet.set_column(1, 1, 100)
+        sheet.freeze_panes(1, 0)
+
+        row_count = 1
+        for code in self.missing:
+            sheet.write(row_count, 0, list(iter(code))[0], excel.format_wrap)
+            sheet.write(row_count, 1, code.get(list(iter(code))[0]), excel.format_wrap)
+            row_count += 1
+
+        # Write commodity examples
+        sheet = excel.add_worksheet("commodities")
+        data = ('Scope', 'Document code', 'Commodity', 'Geo area ID', 'Geo area description', 'Measure type ID', 'Measure type description', 'Trade direction')
+        sheet.write_row('A1', data, excel.format_bold)
+        sheet.set_column(0, 3, 20)
+        sheet.set_column(4, 4, 50)
+        sheet.set_column(5, 5, 20)
+        sheet.set_column(6, 6, 40)
+        sheet.set_column(7, 7, 20)
+        sheet.freeze_panes(1, 0)
+        
+        row_count = 1
+        for row in rows:
+            for i in range(0, 8):
+                sheet.write(row_count, i, row[i], excel.format_wrap)
+            row_count += 1
+
+        excel.close_excel()
 
     def write_json(self):
         self.combine_files()
@@ -193,7 +262,7 @@ class Application(object):
         and mc.certificate_code is not null
         order by 1;
         """
-        print("- Checking the XI tariff")
+        print("- Checking for document codes used in the XI tariff")
         rows_eu = d.run_query(sql, [day_interval])
         for row in rows_eu:
             codes.append(row[0])
@@ -213,7 +282,7 @@ class Application(object):
         and mc.certificate_code is not null
         order by 1;
         """
-        print("- Checking the UK tariff\n")
+        print("- Checking for document codes used in the UK tariff")
         rows_uk = d.run_query(sql, [day_interval])
         for row in rows_uk:
             codes.append(row[0])

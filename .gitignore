@@ -117,4 +117,5 @@ resources/02. overlays/chief/*.md
 resources/03. dest/20*
 resources/03. dest/chief_cds_guidance.json
 resources/04. codes/codes*
-resources/05. missing/*
+resources/05. missing/*.json
+resources/05. missing/*.xlsx

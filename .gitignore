@@ -103,21 +103,15 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-log/
-import/
-xml_in/
-xml_out/
 __pycache__/
 csv/
 temp/
 .vscode/
 .DS_Store
-xml/
-csv/
-db_data/
-instructions.md
 
 # Database
-database.ini
-resources/
-missing.txt
+resources/01. source
+resources/02. overlays
+resources/03. dest
+resources/04. codes
+resources/05. missing

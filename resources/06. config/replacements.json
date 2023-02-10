@@ -1,0 +1,254 @@
+[
+    {
+        "from": "\"",
+        "to": "'"
+    },
+    {
+        "from": "\u2019",
+        "to": "'"
+    },
+    {
+        "from": "\u2013",
+        "to": "-"
+    },
+    {
+        "from": "\u2014",
+        "to": "-"
+    },
+    {
+        "from": "\u2018",
+        "to": "'"
+    },
+    {
+        "from": "\u2022",
+        "to": "\n-"
+    },
+    {
+        "from": "\u00a0",
+        "to": " "
+    },
+    {
+        "from": "\u00fc",
+        "to": "&uuml;"
+    },
+    {
+        "from": "\u201d",
+        "to": "'"
+    },
+    {
+        "from": "\u201c",
+        "to": "'"
+    },
+    {
+        "from": "\u20ac",
+        "to": "&euro;"
+    },
+    {
+        "from": "\u00e7",
+        "to": "&ccedil;"
+    },
+    {
+        "from": "\u00f3",
+        "to": "&oacute;"
+    },
+    {
+        "from": "\u00e8",
+        "to": "&egrave;"
+    },
+    {
+        "from": "\u00e9",
+        "to": "&eacute;"
+    },
+    {
+        "from": "\u00e0",
+        "to": "&agrave;"
+    },
+    {
+        "from": "\u00e6",
+        "to": "&aelig;"
+    },
+    {
+        "from": "\u00f8",
+        "to": "&oslash;"
+    },
+    {
+        "from": "Reg ",
+        "to": "regulation "
+    },
+    {
+        "from": "Where certificates are not sequentially numbered ",
+        "to": "Where certificates are not sequentially numbered, "
+    },
+    {
+        "from": " then ",
+        "to": ", then "
+    },
+    {
+        "from": ", ,",
+        "to": ","
+    },
+    {
+        "from": ",,",
+        "to": ","
+    },
+    {
+        "from": " Where",
+        "to": "\nWhere"
+    },
+    {
+        "from": "Complete statement",
+        "to": "Complete the statement"
+    },
+    {
+        "from": "posts Sufficient",
+        "to": "posts.\nSufficient"
+    },
+    {
+        "from": "Registered Export Number",
+        "to": "Registered Exporter Number"
+    },
+    {
+        "from": "equivlant",
+        "to": "equivalent"
+    },
+    {
+        "from": " formerly referred to as;",
+        "to": ", formerly referred to as"
+    },
+    {
+        "from": "Imports: ICP",
+        "to": "\nFor imports: ICP"
+    },
+    {
+        "from": "Exports: ECP",
+        "to": "For exports: ECP"
+    },
+    {
+        "from": "temp_dot",
+        "to": "."
+    },
+    {
+        "from": "\\(see document status codes for harmonised declarations for definitions\\):",
+        "to": ""
+    },
+    {
+        "from": "\\(see document status codes for harmonised declarations for definitions\\)",
+        "to": ""
+    },
+    {
+        "from": " \\.",
+        "to": "."
+    },
+    {
+        "from": "Use either status code",
+        "to": "Use status code"
+    },
+    {
+        "from": "e\\.g\\.,",
+        "to": "e.g."
+    },
+    {
+        "from": "i\\.e\\.,",
+        "to": "i.e."
+    },
+    {
+        "from": "in\\ndocument",
+        "to": "in document"
+    },
+    {
+        "from": "see\ndocument",
+        "to": "see document"
+    },
+    {
+        "from": "in. Document",
+        "to": "in Document"
+    },
+    {
+        "from": "- \\n\\n",
+        "to": ""
+    },
+    {
+        "from": "products' Use",
+        "to": "products'. Use"
+    },
+    {
+        "from": "\\.If",
+        "to": "\\. If"
+    },
+    {
+        "from": "not held enter",
+        "to": "not held, enter"
+    },
+    {
+        "from": "goods enter",
+        "to": "goods, enter"
+    },
+    {
+        "from": "Ukranian",
+        "to": "Ukrainian"
+    },
+    {
+        "from": "letterss",
+        "to": "letters"
+    },
+    {
+        "from": "Enter:'",
+        "to": "Enter: '"
+    },
+    {
+        "from": "identifers",
+        "to": "identifiers"
+    },
+    {
+        "from": "Identifer",
+        "to": "Identifier"
+    },
+    {
+        "from": "approriate",
+        "to": "appropriate"
+    },
+    {
+        "from": "3 digit",
+        "to": "3-digit"
+    },
+    {
+        "from": "advance.Sufficient",
+        "to": "advance. Sufficient"
+    },
+    {
+        "from": "byt ",
+        "to": "by "
+    },
+    {
+        "from": "constitues",
+        "to": "constitutes"
+    },
+    {
+        "from": "numbered range of document cover ",
+        "to": "numbered range of documents covers "
+    },
+    {
+        "from": "exemption'as",
+        "to": "exemption' as"
+    },
+    {
+        "from": "numbered enter the",
+        "to": "numbered, enter the"
+    },
+    {
+        "from": "‘Complete statement",
+        "to": "Complete statement"
+    },
+    {
+        "from": "n - \rComplete",
+        "to": "n - \nComplete"
+    },
+    {
+        "from": "declarations use",
+        "to": "declarations, use"
+    },
+    {
+        "from": "\\(see Appendix C10 for definitions\\)",
+        "to": ""
+    }
+]

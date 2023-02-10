@@ -1,0 +1,26 @@
+[
+    {
+        "from": "MRN",
+        "to": "Movement Reference Number"
+    },
+    {
+        "from": "RGR",
+        "to": "Returned Goods Relief"
+    },
+    {
+        "from": "IMA",
+        "to": "Inward-Monitoring Arrangement"
+    },
+    {
+        "from": "ICCAT",
+        "to": "International Commission For The Conservation Of Atlantic Tunas"
+    },
+    {
+        "from": "IOTC",
+        "to": "Indian Ocean Tuna Commission"
+    },
+    {
+        "from": "REACH",
+        "to": "Registration, Evaluation, Authorisation and Restriction of Chemicals"
+    }
+]

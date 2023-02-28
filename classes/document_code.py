@@ -21,7 +21,7 @@ class DocumentCode(object):
         self.format_guidance()
         self.format_all()
         self.get_overlays()
-        self.check_if_used()
+        #self.check_if_used()
         self.format_status_codes()
         self.unprotect()
         self.splice_cds_chief()

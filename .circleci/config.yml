@@ -1,0 +1,26 @@
+version: 2.1
+
+jobs:
+  build:
+    working_directory: ~/process-appendix-5a
+    docker:
+      - image: "circleci/python:3.10.7"
+    steps:
+      - checkout
+      - run: python3 process.py
+
+workflows:
+  week_day:
+    triggers:
+      - schedule:
+        cron: "00 7 * * 1,2,3,4,5"
+        filters:
+          branches:
+            only:
+              - main
+      jobs:
+        - build:
+          filters:
+            branches:
+              only:
+                - main

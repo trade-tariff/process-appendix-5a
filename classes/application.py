@@ -15,7 +15,7 @@ from classes.document_code import DocumentCode
 from classes.database import Database
 from classes.excel import Excel
 import classes.functions as func
-
+import boto3
 
 class Application(object):
     def __init__(self):
@@ -57,6 +57,12 @@ class Application(object):
         # Dest files
         self.DEST_FILE = os.getenv('DEST_FILE')
         self.PROTOTYPE_DEST_FILE = os.getenv('PROTOTYPE_DEST_FILE')
+
+        self.AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+        self.AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+        self.AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
+        self.AWS_REGION_NAME = os.getenv('AWS_REGION_NAME')
+        self.AWS_BUCKET_KEY = os.getenv('AWS_BUCKET_KEY')
 
         # Features
         self.write_used_codes = func.do_boolean(os.getenv('WRITE_USED_CODES'))
@@ -233,7 +239,7 @@ class Application(object):
         copyfile(self.json_output, self.DEST_FILE)
 
         # Copy to the conditions UI location
-        copyfile(self.json_output, self.PROTOTYPE_DEST_FILE)
+        #copyfile(self.json_output, self.PROTOTYPE_DEST_FILE)
 
         # Copy to the dated folder
         copyfile(self.json_output, self.json_output2)
@@ -359,3 +365,12 @@ class Application(object):
                 break
 
         return filename2
+
+    def upload_file_to_s3(self):
+        session = boto3.Session(
+            aws_access_key_id=self.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=self.AWS_SECRET_ACCESS_KEY,
+            region_name=self.AWS_REGION_NAME
+        )
+        s3 = session.resource('s3')
+        s3.meta.client.upload_file(Filename=self.DEST_FILE, Bucket=self.AWS_BUCKET_NAME, Key=self.AWS_BUCKET_KEY)

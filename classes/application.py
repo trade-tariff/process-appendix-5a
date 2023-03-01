@@ -63,10 +63,6 @@ class Application(object):
         self.AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
         self.CHIEF_SYNONYM_OBJECT_PATH = "config/chief_cds_guidance.json"
 
-        # Features
-        self.write_used_codes = func.do_boolean(os.getenv("WRITE_USED_CODES"))
-        self.compare_data = func.do_boolean(os.getenv("COMPARE_DATA"))
-
         self.codes_on_govuk = []
 
     def get_status_codes(self):

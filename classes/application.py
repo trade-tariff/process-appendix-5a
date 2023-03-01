@@ -45,8 +45,9 @@ class Application(object):
         self.dated_folder = os.path.join(self.dest_folder, d)
         try:
             os.mkdir(self.dated_folder)
-        except Exception as e:
+        except Exception:
             pass
+
         self.json_output2 = os.path.join(
             self.dated_folder, "chief_cds_guidance_{d}.json".format(d=d)
         )
@@ -60,7 +61,9 @@ class Application(object):
         self.DEST_FILE = os.getenv("DEST_FILE")
 
         # Bucket configuration
-        self.AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
+        self.AWS_BUCKET_NAME = (
+            os.getenv("AWS_BUCKET_NAME") or "trade-tariff-persistence-development"
+        )
         self.CHIEF_SYNONYM_OBJECT_PATH = "config/chief_cds_guidance.json"
 
         self.codes_on_govuk = []
@@ -152,7 +155,7 @@ class Application(object):
                 self.document_codes_all[document_code_cds][
                     "guidance_chief"
                 ] = self.document_codes_chief[document_code_cds]["guidance_chief"]
-            except:
+            except Exception:
                 self.document_codes_all[document_code_cds][
                     "guidance_chief"
                 ] = "This document code is available on CDS only."
@@ -248,9 +251,11 @@ class Application(object):
     def upload_file_to_s3(self):
         try:
             s3_client = boto3.client("s3")
-            file = open(self.DEST_FILE, "rb")
+
             s3_client.upload_file(
-                file, self.AWS_BUCKET_NAME, self.CHIEF_SYNONYM_OBJECT_PATH
+                self.DEST_FILE,
+                self.AWS_BUCKET_NAME,
+                self.CHIEF_SYNONYM_OBJECT_PATH,
             )
         except NoCredentialsError:
             print("No AWS credentials found")

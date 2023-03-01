@@ -1,5 +1,6 @@
 import re
 import classes.globals as g
+import os
 
 
 class DocumentCode(object):
@@ -17,7 +18,7 @@ class DocumentCode(object):
         self.guidance_cds = ""
         self.guidance_chief = ""
         self.applies_to_chief = False
-        self.url_5b = "https://www.gov.uk/government/publications/uk-trade-tariff-document-status-codes-for-harmonised-declarations/uk-trade-tariff-document-status-codes-for-harmonised-declarations"
+        self.url_5b = os.getenv("URL_5B")
 
         self.protect()
         self.format_guidance()

@@ -1,26 +1,78 @@
 version: 2.1
 
 jobs:
-  build:
-    working_directory: ~/process-appendix-5a
+  lint:
+      docker:
+        - image: cimg/python:3.11.2
+      steps:
+          - checkout
+          - run:
+              name: install flake8
+              command: pip install flake8==5.0.4
+          - run:
+              name: run flake8
+              command: flake8 .
+  test:
+    docker:
+      - image: cimg/python:3.10.7
+    environment:
+      AWS_BUCKET_NAME: "trade-tariff-persitence-development"
+    steps:
+      - checkout
+      - restore_cache:
+          key: deps-1.0.0-{{ checksum "requirements.txt" }}
+      - run:
+          name: "Setup environment"
+          command: |
+            python -m venv venv
+            source venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: deps-1.0.0-{{ checksum "requirements.txt" }}
+          paths:
+            - "venv"
+      - run:
+          name: "Integrate functionality"
+          command: |
+            touch .env
+            source venv/bin/activate
+            python process.py
+
+  produce-appendix-5a:
     docker:
       - image: "circleci/python:3.10.7"
     steps:
       - checkout
-      - run: python3 process.py
+      - run:
+          name: "Generate the Appendix 5A file and upload it to our persistence bucket"
+          command: python3 process.py
 
 workflows:
   week_day:
     triggers:
       - schedule:
-          cron: "00 7 * * 1,2,3,4,5"
+          cron: "00 21 * * 1,2,3,4,5"
           filters:
             branches:
               only:
                 - main
     jobs:
-      - build:
-        filters:
-          branches:
-            only:
-              - main
+      - produce-appendix-5a:
+          filters:
+            branches:
+              only:
+                - main
+
+  ci:
+    jobs:
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - main
+      - test:
+          context: trade-tariff
+          filters:
+            branches:
+              ignore:
+                - main

@@ -3,7 +3,9 @@ import classes.globals as g
 
 
 class DocumentCode(object):
-    def __init__(self, file, code, direction, level, description, guidance, status_codes_cds):
+    def __init__(
+        self, file, code, direction, level, description, guidance, status_codes_cds
+    ):
         self.file = file
         self.code = code
         self.direction = direction
@@ -24,18 +26,18 @@ class DocumentCode(object):
         self.format_status_codes()
         self.unprotect()
         self.splice_cds_chief()
-        
+
     def get_overlays(self):
         self.get_overlays_cds()
         self.get_overlays_chief()
-        
+
     def get_overlays_cds(self):
         self.has_overlay = False
         if self.file != "chief":
             if self.code in g.app.overlays:
                 self.has_overlay = True
                 self.guidance = g.app.overlays[self.code]
-        
+
     def get_overlays_chief(self):
         return
 
@@ -49,10 +51,13 @@ class DocumentCode(object):
         self.guidance = self.guidance.replace("- - ", "\t- ")
         self.guidance = self.guidance.replace("-  - ", "\t- ")
         self.guidance = self.guidance.replace("\n\t", "\n")
-        
-        
-        self.guidance = self.guidance.replace("- Enter the following", "Enter the following")
-        self.guidance = self.guidance.replace("Enter the following -", "Enter the following:")
+
+        self.guidance = self.guidance.replace(
+            "- Enter the following", "Enter the following"
+        )
+        self.guidance = self.guidance.replace(
+            "Enter the following -", "Enter the following:"
+        )
 
         self.status_codes_cds = g.app.cleanse_generic(self.status_codes_cds)
         self.status_codes_cds = self.status_codes_cds.rstrip(".")
@@ -61,57 +66,71 @@ class DocumentCode(object):
             self.guidance = self.guidance.replace("- ", "")
 
     def protect(self):
-        self.guidance = re.sub(r"Note yyyy.", 'Note yyyytemp_dot', self.guidance)
-        self.guidance = re.sub(r"consignment.", 'consignment', self.guidance)
-        self.guidance = re.sub(r'GBCHDyyyy.', 'GBCHDyyyytemp_dot', self.guidance)
-        self.guidance = re.sub(r'personal consumption or use ', 'personal consumption or use). ', self.guidance)
-        self.guidance = re.sub(r'\nCUSTOMS SCHEMES', ' customs schemes', self.guidance)
-        self.guidance = self.guidance.replace('ATT', 'A-T-T')
-        self.guidance = self.guidance.replace('Reg.', 'Regulation')
-        self.guidance = self.guidance.replace('reg.', 'regulation')
+        self.guidance = re.sub(r"Note yyyy.", "Note yyyytemp_dot", self.guidance)
+        self.guidance = re.sub(r"consignment.", "consignment", self.guidance)
+        self.guidance = re.sub(r"GBCHDyyyy.", "GBCHDyyyytemp_dot", self.guidance)
+        self.guidance = re.sub(
+            r"personal consumption or use ",
+            "personal consumption or use). ",
+            self.guidance,
+        )
+        self.guidance = re.sub(r"\nCUSTOMS SCHEMES", " customs schemes", self.guidance)
+        self.guidance = self.guidance.replace("ATT", "A-T-T")
+        self.guidance = self.guidance.replace("Reg.", "Regulation")
+        self.guidance = self.guidance.replace("reg.", "regulation")
 
     def unprotect(self):
-        self.guidance = self.guidance.replace('A-T-T', 'ATT')
-        self.guidance = self.guidance.replace('- \n\n', '')
-        
+        self.guidance = self.guidance.replace("A-T-T", "ATT")
+        self.guidance = self.guidance.replace("- \n\n", "")
+
         # Remove \n at the end
-        self.guidance = re.sub(r'\n\n$', '', self.guidance)
-        self.guidance = re.sub(r'\n$', '', self.guidance)
+        self.guidance = re.sub(r"\n\n$", "", self.guidance)
+        self.guidance = re.sub(r"\n$", "", self.guidance)
 
     def format_guidance(self):
         # This runs before all the replacements
-        self.guidance = re.sub(r'i\.e\. ', ', e.g. ', self.guidance)
-        self.guidance = re.sub(r', , e\.g\. ', ', e.g. ', self.guidance)
-        self.guidance = re.sub('\. ', '.\n', self.guidance)
-        self.guidance = re.sub(r'\n ', '\n', self.guidance)
-        self.guidance = re.sub(r'\n\n', '\n', self.guidance)
-        self.guidance = re.sub(r'e\.g\.\n', 'e.g. ', self.guidance)
-        self.guidance = re.sub(r'No\.\n', 'No. ', self.guidance)
-        self.guidance = re.sub(r' ,', ',', self.guidance)
+        self.guidance = re.sub(r"i\.e\. ", ", e.g. ", self.guidance)
+        self.guidance = re.sub(r", , e\.g\. ", ", e.g. ", self.guidance)
+        self.guidance = re.sub("\. ", ".\n", self.guidance)
+        self.guidance = re.sub(r"\n ", "\n", self.guidance)
+        self.guidance = re.sub(r"\n\n", "\n", self.guidance)
+        self.guidance = re.sub(r"e\.g\.\n", "e.g. ", self.guidance)
+        self.guidance = re.sub(r"No\.\n", "No. ", self.guidance)
+        self.guidance = re.sub(r" ,", ",", self.guidance)
 
         # Grammar issues
-        self.guidance = re.sub(r'range of certificates cover the goods', 'range of certificates covers the goods,', self.guidance)
-        self.guidance = re.sub(r'range of documents cover the goods', 'range of documents covers the goods,', self.guidance)
-        self.guidance = re.sub(r'goods insert', 'goods, insert', self.guidance)
+        self.guidance = re.sub(
+            r"range of certificates cover the goods",
+            "range of certificates covers the goods,",
+            self.guidance,
+        )
+        self.guidance = re.sub(
+            r"range of documents cover the goods",
+            "range of documents covers the goods,",
+            self.guidance,
+        )
+        self.guidance = re.sub(r"goods insert", "goods, insert", self.guidance)
 
         # Chief only data replacements
         if self.file == "chief":
-            self.guidance = self.guidance.replace("following status codes", "[status codes](" + self.url_5b + ")")
-            self.guidance = self.guidance.replace("Use either status code", "Use [status code](" + self.url_5b + ")")
-        
+            self.guidance = self.guidance.replace(
+                "following status codes", "[status codes](" + self.url_5b + ")"
+            )
+            self.guidance = self.guidance.replace(
+                "Use either status code", "Use [status code](" + self.url_5b + ")"
+            )
+
         # Abbreviations
         self.replace_abbreviations()
-        
+
     def expand_status_codes(self):
         for sc in g.app.status_codes:
             replacement = "\\1<abbr title='{title}'>{status_code}</abbr>\\3".format(
-                    title = g.app.status_codes[sc],
-                    status_code = sc
-                )
+                title=g.app.status_codes[sc], status_code=sc
+            )
             replacement2 = "\\1<abbr title='{title}'>{status_code}</abbr>".format(
-                    title = g.app.status_codes[sc],
-                    status_code = sc
-                )
+                title=g.app.status_codes[sc], status_code=sc
+            )
             self.guidance = re.sub(r"(\W)(" + sc + ")(\W)", replacement, self.guidance)
             self.guidance = re.sub(r"(\W)(" + sc + ")$", replacement2, self.guidance)
 
@@ -129,7 +148,9 @@ class DocumentCode(object):
     def replace_abbreviations(self):
         for item in g.app.abbreviations:
             self.guidance = self.guidance.replace(
-                item["from"], "<abbr title='" + item["to"] + "'>" + item["from"] + "</abbr>")
+                item["from"],
+                "<abbr title='" + item["to"] + "'>" + item["from"] + "</abbr>",
+            )
 
     def as_dict(self):
         ret = {
@@ -147,7 +168,10 @@ class DocumentCode(object):
         self.status_codes_cds = self.status_codes_cds.replace("or ", ", ")
         addendum = ""
         if self.file != "chief":
-            if "No status code is required" in self.status_codes_cds or "No document status code is required" in self.status_codes_cds:
+            if (
+                "No status code is required" in self.status_codes_cds
+                or "No document status code is required" in self.status_codes_cds
+            ):
                 self.status_codes_cds = []
                 self.guidance += "\n- No document status code is required."
             else:
@@ -158,17 +182,25 @@ class DocumentCode(object):
                     addendum = splitter + tmp[1]
                 self.status_codes_cds = self.status_codes_cds.replace(" ", "")
                 self.status_codes_cds = self.status_codes_cds.split(",")
-                
+
                 if len(self.status_codes_cds) == 1:
                     if self.status_codes_cds[0] == "":
                         self.status_codes_cds = []
-                
+
                 if len(self.status_codes_cds) == 1:
-                    self.guidance += "\n- Use the following [document status code](" + self.url_5b + "): "
+                    self.guidance += (
+                        "\n- Use the following [document status code]("
+                        + self.url_5b
+                        + "): "
+                    )
                 elif len(self.status_codes_cds) == 0:
                     pass
                 else:
-                    self.guidance += "\n- Use one of the following [document status codes](" + self.url_5b + "): "
+                    self.guidance += (
+                        "\n- Use one of the following [document status codes]("
+                        + self.url_5b
+                        + "): "
+                    )
 
                 for c in self.status_codes_cds:
                     c = c.strip()

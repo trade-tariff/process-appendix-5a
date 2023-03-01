@@ -13,14 +13,14 @@ workflows:
   week_day:
     triggers:
       - schedule:
-        cron: "00 7 * * 1,2,3,4,5"
-        filters:
-          branches:
-            only:
-              - main
-      jobs:
-        - build:
+          cron: "00 7 * * 1,2,3,4,5"
           filters:
             branches:
               only:
                 - main
+    jobs:
+      - build:
+        filters:
+          branches:
+            only:
+              - main

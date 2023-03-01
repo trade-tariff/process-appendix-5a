@@ -82,7 +82,6 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -123,3 +122,5 @@ resources/05. missing/*.xlsx
 
 # Shortcuts
 p
+
+chief_cds_guidance.json

@@ -62,6 +62,10 @@ workflows:
             branches:
               only:
                 - main
+      - slack/notify:
+          channel: deployments
+          event: fail
+          template: basic_fail_1
 
   ci:
     jobs:

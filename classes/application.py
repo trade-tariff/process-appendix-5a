@@ -238,9 +238,6 @@ class Application(object):
         # Copy to the OTT prototype
         copyfile(self.json_output, self.DEST_FILE)
 
-        # Copy to the conditions UI location
-        #copyfile(self.json_output, self.PROTOTYPE_DEST_FILE)
-
         # Copy to the dated folder
         copyfile(self.json_output, self.json_output2)
 
@@ -250,58 +247,8 @@ class Application(object):
         else:
             return ""
 
-    def get_used_document_codes(self):
-        print("Determining which document codes are used\n")
-        codes = []
-        self.code_dict = {}
-
-        sql = """
-        SELECT DISTINCT ON (c.certificate_type_code, c.certificate_code) c.certificate_type_code || c.certificate_code AS code,
-        cd.description
-        FROM certificates c,
-        certificate_descriptions cd,
-        certificate_description_periods cdp
-        WHERE c.certificate_code = cd.certificate_code
-        AND c.certificate_type_code = cd.certificate_type_code
-        AND c.certificate_code = cdp.certificate_code
-        AND c.certificate_type_code = cdp.certificate_type_code
-        AND c.certificate_code = cd.certificate_code
-        AND c.certificate_type_code = cd.certificate_type_code
-        ORDER BY c.certificate_type_code, c.certificate_code, cdp.validity_start_date DESC"""
-
-        # Bring back data from the EU first
-        d = Database("eu")
-        print("- Checking for document codes used in the XI tariff")
-        rows_eu = d.run_query(sql)
-        for row in rows_eu:
-            codes.append(row[0])
-            self.code_dict[row[0]] = row[1]
-
-        # Then bring back data from the UK first
-        d = Database("uk")
-        print("- Checking for document codes used in the UK tariff\n")
-        rows_uk = d.run_query(sql)
-        for row in rows_uk:
-            codes.append(row[0])
-            self.code_dict[row[0]] = row[1].replace('"', "'")
-
-        # Then combine and de-duplicate them
-        codes = list(set(codes))
-        self.used_document_codes = sorted(codes)
-        self.write_used_document_codes()
-
     def get_today_string(self):
         return date.today().strftime("%Y-%m-%d")
-
-    def write_used_document_codes(self):
-        if self.write_used_codes:
-            filename = "codes-{date}.csv".format(date=self.get_today_string())
-            filename = os.path.join(os.getcwd(), self.codes_folder, filename)
-            with open(filename, 'w') as f:
-                f.write('"Code", "Description"\n')
-                for code in self.used_document_codes:
-                    f.write('"' + code + '", "' + self.code_dict[code] + '"\n')
-            f.close()
 
     def setup_replacements_and_abbreviations(self):
         path = os.path.join(self.config_folder, "replacements.json")

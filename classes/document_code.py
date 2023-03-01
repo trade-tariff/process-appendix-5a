@@ -21,7 +21,6 @@ class DocumentCode(object):
         self.format_guidance()
         self.format_all()
         self.get_overlays()
-        #self.check_if_used()
         self.format_status_codes()
         self.unprotect()
         self.splice_cds_chief()
@@ -39,9 +38,6 @@ class DocumentCode(object):
         
     def get_overlays_chief(self):
         return
-
-    def check_if_used(self):
-        self.used = "Yes" if self.code in g.app.used_document_codes else "No"
 
     def format_all(self):
         self.code = g.app.cleanse_generic(self.code)

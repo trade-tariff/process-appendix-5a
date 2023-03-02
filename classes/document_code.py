@@ -92,7 +92,7 @@ class DocumentCode(object):
         # This runs before all the replacements
         self.guidance = re.sub(r"i\.e\. ", ", e.g. ", self.guidance)
         self.guidance = re.sub(r", , e\.g\. ", ", e.g. ", self.guidance)
-        self.guidance = re.sub(". ", ".\n", self.guidance)
+        self.guidance = re.sub(r"\. ", ".\n", self.guidance)
         self.guidance = re.sub(r"\n ", "\n", self.guidance)
         self.guidance = re.sub(r"\n\n", "\n", self.guidance)
         self.guidance = re.sub(r"e\.g\.\n", "e.g. ", self.guidance)

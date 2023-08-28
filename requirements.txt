@@ -1,6 +1,6 @@
 XlsxWriter==3.1.2
 beautifulsoup4==4.12.2
-boto3==1.28.21
+boto3==1.28.36
 defusedxml==0.7.1
 lxml==4.9.3
 psycopg2-binary==2.9.7

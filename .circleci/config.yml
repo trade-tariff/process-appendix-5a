@@ -79,24 +79,33 @@ workflows:
     jobs:
       - produce-appendix-5a:
           context: trade-tariff
-          name: 'development'
-          bucket_name: trade-tariff-persistence-development
-          filters:
-            branches:
-              only:
-                - main
-      - produce-appendix-5a:
-          context: trade-tariff
-          name: 'staging'
-          bucket_name: trade-tariff-persistence-staging
-          filters:
-            branches:
-              only:
-                - main
-      - produce-appendix-5a:
-          context: trade-tariff
           name: 'production'
           bucket_name: trade-tariff-persistence-production
+          filters:
+            branches:
+              only:
+                - main
+
+      - produce-appendix-5a:
+          context: trade-tariff-appendix-5a-development
+          name: 'new-aws-development'
+          bucket_name: trade-tariff-persistence-844815912454
+          filters:
+            branches:
+              only:
+                - main
+      - produce-appendix-5a:
+          context: trade-tariff-appendix-5a-staging
+          name: 'new-aws-staging'
+          bucket_name: trade-tariff-persistence-451934005581
+          filters:
+            branches:
+              only:
+                - main
+      - produce-appendix-5a:
+          context: trade-tariff-appendix-5a-production
+          name: 'new-aws-production'
+          bucket_name: trade-tariff-persistence-382373577178
           filters:
             branches:
               only:

@@ -96,57 +96,56 @@ class Application(object):
         print("Getting data from source:", file)
         filename = os.path.join(self.source_folder, self.filenames[file])
         data = get_data(filename)
-        for key in data:
-            if key == "Sheet1":
-                data = data[key]
-                row_index = 1
-                for row in data:
-                    if row_index > 1:
-                        if file == "chief":
-                            code = self.check(row, 0).strip()
-                            direction = self.check(row, 1)
-                            level = self.check(row, 2)
-                            description = self.check(row, 3)
-                            guidance = self.check(row, 4)
-                            status_codes_cds = ""
-                        else:
-                            code = self.check(row, 0).strip()
-                            direction = self.check(row, 1)
-                            description = self.check(row, 2)
-                            guidance = self.check(row, 3)
-                            status_codes_cds = self.check(row, 4)
-                            level = ""
 
-                        if code != "":
-                            document_code = DocumentCode(
-                                file,
-                                code,
-                                direction,
-                                level,
-                                description,
-                                guidance,
-                                status_codes_cds,
-                            )
+        for row in next(iter(data.values()))[1:]:
+            if file == "chief":
+                code = self.check(row, 0).strip()
+                direction = self.check(row, 1)
+                level = self.check(row, 2)
+                description = self.check(row, 3)
+                guidance = self.check(row, 4)
+                status_codes_cds = ""
+            else:
+                code = self.check(row, 0).strip()
+                direction = self.check(row, 1)
+                description = self.check(row, 2)
+                guidance = self.check(row, 3)
+                status_codes_cds = self.check(row, 4)
+                level = ""
 
-                            if file == "cds_union":
-                                self.document_codes_union[
-                                    document_code.code
-                                ] = document_code.as_dict()
-                            elif file == "cds_national":
-                                self.document_codes_national[
-                                    document_code.code
-                                ] = document_code.as_dict()
-                            elif file == "chief":
-                                self.document_codes_chief[
-                                    document_code.code
-                                ] = document_code.as_dict()
+            if code != "":
+                document_code = DocumentCode(
+                    file,
+                    code,
+                    direction,
+                    level,
+                    description,
+                    guidance,
+                    status_codes_cds,
+                )
 
-                            if code not in self.codes_on_govuk:
-                                self.codes_on_govuk.append(code)
-                    row_index += 1
+                if file == "cds_union":
+                    self.document_codes_union[
+                        document_code.code
+                    ] = document_code.as_dict()
+                elif file == "cds_national":
+                    self.document_codes_national[
+                        document_code.code
+                    ] = document_code.as_dict()
+                elif file == "chief":
+                    self.document_codes_chief[
+                        document_code.code
+                    ] = document_code.as_dict()
+
+                if code not in self.codes_on_govuk:
+                    self.codes_on_govuk.append(code)
 
     def combine_files(self):
         print("Combining all data sources")
+        print(len(self.document_codes_union), "Union codes")
+        print(len(self.document_codes_national), "National codes")
+        print(len(self.document_codes_chief), "Chief codes")
+
         self.document_codes_all = (
             self.document_codes_union | self.document_codes_national
         )
@@ -160,6 +159,8 @@ class Application(object):
                     "guidance_chief"
                 ] = "This document code is available on CDS only."
                 pass
+
+        print(len(self.document_codes_all), "Total document codes")
 
     def write_file(self):
         print("Writing output")

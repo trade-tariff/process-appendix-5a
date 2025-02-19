@@ -18,6 +18,8 @@
 
 ### Overview steps
 
+- CHIEF processing is now deprecated
+
 - Get hold of the latest Excel files from gov.uk
 
 - Get local overlays (if required) - this will be discussed below
@@ -38,7 +40,7 @@ In theory, there are four files that we are interested in, as follows:
 
 - A list of the UK’s document codes and instructions on how to enter them on CDS (CDS National data)
 
-- A list of CHIEF’s codes (UK and EU) and how to enter them (CHIEF data)
+- **DEPRECATED** A list of CHIEF’s codes (UK and EU) and how to enter them (CHIEF data)
 
 - A list of status codes
 
@@ -56,7 +58,7 @@ https://www.gov.uk/government/publications/data-element-23-documents-and-other-r
 
 https://www.gov.uk/guidance/data-element-23-documents-and-other-reference-codes-national-of-the-customs-declaration-service-cds
 
-**CHIEF data**
+**CHIEF data (DEPRECATED)**
 
 https://www.gov.uk/government/publications/uk-trade-tariff-document-certificate-and-authorisation-codes-for-harmonised-declarations
 
@@ -84,7 +86,7 @@ The way that the current app works is:
 
 - there is a subfolder containing overlays
 
-- one sub-subfolder for CHIEF overlays
+- **DEPRECATED** one sub-subfolder for CHIEF overlays
 
 - one sub-subfolder for CDS overlays
 

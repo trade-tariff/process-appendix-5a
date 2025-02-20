@@ -38,10 +38,9 @@ class Application(object):
         func.make_folder(self.missing_folder)
 
         self.overlay_folder_cds = os.path.join(self.overlay_folder, "cds")
-        self.overlay_folder_chief = os.path.join(self.overlay_folder, "chief")
 
         d = self.get_today_string()
-        self.json_output = os.path.join(self.dest_folder, "chief_cds_guidance.json")
+        self.json_output = os.path.join(self.dest_folder, "cds_guidance.json")
         self.dated_folder = os.path.join(self.dest_folder, d)
         try:
             os.mkdir(self.dated_folder)
@@ -55,7 +54,6 @@ class Application(object):
         # URLs
         self.url_union = os.getenv("URL_UNION")
         self.url_national = os.getenv("URL_NATIONAL")
-        self.url_chief = os.getenv("URL_CHIEF")
 
         # Dest files
         self.DEST_FILE = os.getenv("DEST_FILE")
@@ -64,7 +62,7 @@ class Application(object):
         self.AWS_BUCKET_NAME = (
             os.getenv("AWS_BUCKET_NAME") or "trade-tariff-persistence-development"
         )
-        self.CHIEF_SYNONYM_OBJECT_PATH = "config/chief_cds_guidance.json"
+        self.CDS_SYNONYM_OBJECT_PATH = "config/cds_guidance.json"
 
         self.codes_on_govuk = []
 
@@ -81,11 +79,9 @@ class Application(object):
     def get_data(self):
         self.document_codes_national = {}
         self.document_codes_union = {}
-        self.document_codes_chief = {}
 
         self.get_file("cds_union")
         self.get_file("cds_national")
-        self.get_file("chief")
         self.codes_on_govuk.sort()
 
     def write_json(self):
@@ -98,20 +94,12 @@ class Application(object):
         data = get_data(filename)
 
         for row in next(iter(data.values()))[1:]:
-            if file == "chief":
-                code = self.check(row, 0).strip()
-                direction = self.check(row, 1)
-                level = self.check(row, 2)
-                description = self.check(row, 3)
-                guidance = self.check(row, 4)
-                status_codes_cds = ""
-            else:
-                code = self.check(row, 0).strip()
-                direction = self.check(row, 1)
-                description = self.check(row, 2)
-                guidance = self.check(row, 3)
-                status_codes_cds = self.check(row, 4)
-                level = ""
+            code = self.check(row, 0).strip()
+            direction = self.check(row, 1)
+            description = self.check(row, 2)
+            guidance = self.check(row, 3)
+            status_codes_cds = self.check(row, 4)
+            level = ""
 
             if code != "":
                 document_code = DocumentCode(
@@ -132,10 +120,6 @@ class Application(object):
                     self.document_codes_national[
                         document_code.code
                     ] = document_code.as_dict()
-                elif file == "chief":
-                    self.document_codes_chief[
-                        document_code.code
-                    ] = document_code.as_dict()
 
                 if code not in self.codes_on_govuk:
                     self.codes_on_govuk.append(code)
@@ -144,21 +128,10 @@ class Application(object):
         print("Combining all data sources")
         print(len(self.document_codes_union), "Union codes")
         print(len(self.document_codes_national), "National codes")
-        print(len(self.document_codes_chief), "Chief codes")
 
         self.document_codes_all = (
             self.document_codes_union | self.document_codes_national
         )
-        for document_code_cds in self.document_codes_all:
-            try:
-                self.document_codes_all[document_code_cds][
-                    "guidance_chief"
-                ] = self.document_codes_chief[document_code_cds]["guidance_chief"]
-            except Exception:
-                self.document_codes_all[document_code_cds][
-                    "guidance_chief"
-                ] = "This document code is available on CDS only."
-                pass
 
         print(len(self.document_codes_all), "Total document codes")
 
@@ -219,12 +192,10 @@ class Application(object):
     def get_ods_files(self):
         self.cds_national = self.get_ods_file(self.url_national, "national.ods")
         self.cds_union = self.get_ods_file(self.url_union, "union.ods")
-        self.chief = self.get_ods_file(self.url_chief, "chief.ods")
 
         self.filenames = {
             "cds_national": self.cds_national,
             "cds_union": self.cds_union,
-            "chief": self.chief,
         }
 
     def get_ods_file(self, url, dest):
@@ -256,7 +227,7 @@ class Application(object):
             s3_client.upload_file(
                 self.DEST_FILE,
                 self.AWS_BUCKET_NAME,
-                self.CHIEF_SYNONYM_OBJECT_PATH,
+                self.CDS_SYNONYM_OBJECT_PATH,
             )
         except NoCredentialsError:
             print("No AWS credentials found")

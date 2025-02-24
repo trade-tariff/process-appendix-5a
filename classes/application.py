@@ -23,7 +23,6 @@ class Application(object):
     def __init__(self):
         self.resources_folder = os.path.join(os.getcwd(), "resources")
         self.source_folder = os.path.join(self.resources_folder, "01. source")
-        self.overlay_folder = os.path.join(self.resources_folder, "02. overlays")
         self.dest_folder = os.path.join(self.resources_folder, "03. dest")
         self.codes_folder = os.path.join(self.resources_folder, "04. codes")
         self.missing_folder = os.path.join(self.resources_folder, "05. missing")
@@ -32,12 +31,9 @@ class Application(object):
 
         func.make_folder(self.resources_folder)
         func.make_folder(self.source_folder)
-        func.make_folder(self.overlay_folder)
         func.make_folder(self.dest_folder)
         func.make_folder(self.codes_folder)
         func.make_folder(self.missing_folder)
-
-        self.overlay_folder_cds = os.path.join(self.overlay_folder, "cds")
 
         d = self.get_today_string()
         self.json_output = os.path.join(self.dest_folder, "cds_guidance.json")
@@ -172,22 +168,6 @@ class Application(object):
             s = re.sub(replacement["from"], replacement["to"], s)
         s = re.sub(" +", " ", s)
         return s.strip()
-
-    def get_overlays(self):
-        path = os.path.join(self.overlay_folder_cds, "*.md")
-        md_files = []
-        for file in glob(path):
-            md_files.append(file)
-
-        md_files.sort()
-        self.overlays = {}
-        for file in md_files:
-            document_code = file.replace(".md", "")
-            document_code = document_code.replace(self.overlay_folder_cds, "")
-            document_code = document_code.replace("/", "")
-            f = open(file, "r")
-            contents = f.read()
-            self.overlays[document_code] = contents
 
     def get_ods_files(self):
         self.cds_national = self.get_ods_file(self.url_national, "national.ods")

@@ -21,19 +21,9 @@ class DocumentCode(object):
         self.protect()
         self.format_guidance()
         self.format_all()
-        self.get_overlays()
         self.format_status_codes()
         self.unprotect()
         self.splice_cds()
-
-    def get_overlays(self):
-        self.get_overlays_cds()
-
-    def get_overlays_cds(self):
-        self.has_overlay = False
-        if self.code in g.app.overlays:
-            self.has_overlay = True
-            self.guidance = g.app.overlays[self.code]
 
     def format_all(self):
         self.code = g.app.cleanse_generic(self.code)
@@ -142,9 +132,6 @@ class DocumentCode(object):
         return ret
 
     def format_status_codes(self):
-        if self.has_overlay:
-            return
-
         self.status_codes_cds = self.status_codes_cds.replace("*", " *")
         self.status_codes_cds = self.status_codes_cds.replace("or ", ", ")
         addendum = ""

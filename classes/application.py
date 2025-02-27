@@ -86,6 +86,7 @@ class Application(object):
 
     def get_file(self, file):
         print("Getting data from source:", file)
+
         filename = os.path.join(self.source_folder, self.filenames[file])
         data = get_data(filename)
 
@@ -179,26 +180,19 @@ class Application(object):
         }
 
     def get_ods_file(self, url, dest):
-        dated_folder = os.path.join(self.source_folder, self.get_today_string())
-        if not os.path.exists(dated_folder):
-            os.mkdir(dated_folder)
         request = requests.get(url)
-        soup = BeautifulSoup(request.text, "lxml")
-        href_tags = ["a"]
-        filename2 = ""
 
-        for tag in soup.find_all(href_tags):
-            href = tag.attrs["href"]
+        soup = BeautifulSoup(request.text, "lxml")
+        filename = ''
+
+        for tag in soup.find_all("a", href=True):
+            href = tag["href"]
             if ".ods" in href:
                 r = requests.get(href)
-                filename = os.path.join(self.source_folder, "latest", dest)
+                filename = os.path.join(self.source_folder, dest)
                 with open(filename, "wb") as f:
                     f.write(r.content)
-                filename2 = os.path.join(dated_folder, dest)
-                copyfile(filename, filename2)
-                break
-
-        return filename2
+                return filename
 
     def upload_file_to_s3(self):
         try:

@@ -109,8 +109,7 @@ temp/
 .DS_Store
 
 # Database
-resources/01. source/20*
-resources/01. source/latest/*.ods
+resources/01. source/*.ods
 resources/03. dest/20*
 resources/03. dest/cds_guidance.json
 resources/04. codes/codes*

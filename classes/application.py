@@ -96,14 +96,12 @@ class Application(object):
             description = self.check(row, 2)
             guidance = self.check(row, 3)
             status_codes_cds = self.check(row, 4)
-            level = ""
 
             if code != "":
                 document_code = DocumentCode(
                     file,
                     code,
                     direction,
-                    level,
                     description,
                     guidance,
                     status_codes_cds,

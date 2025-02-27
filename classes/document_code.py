@@ -5,7 +5,7 @@ import os
 
 class DocumentCode(object):
     def __init__(
-        self, file, code, direction, level, description, guidance, status_codes_cds
+        self, file, code, direction, description, guidance, status_codes_cds, level = ''
     ):
         self.file = file
         self.code = code

@@ -60,8 +60,6 @@ class Application(object):
         )
         self.CDS_SYNONYM_OBJECT_PATH = "config/cds_guidance.json"
 
-        self.codes_on_govuk = []
-
     def get_status_codes(self):
         print("Getting status codes")
         self.status_codes = {}
@@ -77,7 +75,6 @@ class Application(object):
 
         self.get_file("cds_union")
         self.get_file("cds_national")
-        self.codes_on_govuk.sort()
 
     def write_json(self):
         self.write_file()
@@ -92,30 +89,29 @@ class Application(object):
             raise ValueError("Data dictionary is empty.")
 
         for row in next(iter(data.values()))[1:]:
-            # DocumentCode has 5 columns
-            if len(row) > 4:
+            if len(row) > 0:
                 code = str(row[0]).strip()
+            else:
+                break
 
-                if code != "":
-                    try:
-                        document_code = DocumentCode(
-                            file,
-                            code,
-                            direction=row[1],
-                            description=row[2],
-                            guidance=row[3],
-                            status_codes_cds=row[4]
-                        )
+            if len(row) > 4:
+                try:
+                    document_code = DocumentCode(
+                        file,
+                        code,
+                        direction=row[1],
+                        description=row[2],
+                        guidance=row[3],
+                        status_codes_cds=row[4]
+                    )
 
-                        self.document_codes[document_code.code] = document_code.as_dict()
+                    self.document_codes[document_code.code] = document_code.as_dict()
 
-                    except Exception as e:
-                        print(f"Error processing row #{code}: {e}")
-
-                    if code not in self.codes_on_govuk:
-                        self.codes_on_govuk.append(code)
-            continue
-
+                except Exception as e:
+                    print(f"Error processing row #{code}: {e}")
+                    continue
+            else:
+                print(f"No data for code: {code}, missing values are defaulted to empty strings")
 
     def write_file(self):
         print("Writing output")
@@ -149,11 +145,10 @@ class Application(object):
             self.abbreviations = json.load(f)
 
     def cleanse_generic(self, s):
-        s = re.sub(" +", " ", s)
+        # breakpoint()
         for replacement in self.replacements:
             s = re.sub(replacement["from"], replacement["to"], s)
-        s = re.sub(" +", " ", s)
-        return s.strip()
+        return re.sub(" +", " ", s).strip()
 
     def get_ods_files(self):
         self.cds_national = self.get_ods_file(self.url_national, "national.ods")
@@ -170,7 +165,6 @@ class Application(object):
         soup = BeautifulSoup(request.text, "lxml")
         filename = ''
 
-        # breakpoint()
         for tag in soup.find_all("a", href=True):
             href = tag["href"]
             if ".ods" in href:

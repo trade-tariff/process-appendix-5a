@@ -10,10 +10,10 @@ class DocumentCode(object):
         self.file = file
         self.code = code
         self.direction = direction
-        self.level = level
         self.description = description
         self.guidance = guidance
         self.status_codes_cds = str(status_codes_cds)
+        self.level = level
 
         self.guidance_cds = ""
         self.url_5b = os.getenv("URL_5B")

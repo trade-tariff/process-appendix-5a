@@ -73,15 +73,13 @@ class Application(object):
                 self.status_codes[status_code] = description
 
     def get_data(self):
-        self.document_codes_national = {}
-        self.document_codes_union = {}
+        self.document_codes = {}
 
         self.get_file("cds_union")
         self.get_file("cds_national")
         self.codes_on_govuk.sort()
 
     def write_json(self):
-        self.combine_files()
         self.write_file()
 
     def get_file(self, file):
@@ -90,50 +88,39 @@ class Application(object):
         filename = os.path.join(self.source_folder, self.filenames[file])
         data = get_data(filename)
 
+        if not data:
+            raise ValueError("Data dictionary is empty.")
+
         for row in next(iter(data.values()))[1:]:
-            code = self.check(row, 0).strip()
-            direction = self.check(row, 1)
-            description = self.check(row, 2)
-            guidance = self.check(row, 3)
-            status_codes_cds = self.check(row, 4)
+            # DocumentCode has 5 columns
+            if len(row) > 4:
+                code = str(row[0]).strip()
 
-            if code != "":
-                document_code = DocumentCode(
-                    file,
-                    code,
-                    direction,
-                    description,
-                    guidance,
-                    status_codes_cds,
-                )
+                if code != "":
+                    try:
+                        document_code = DocumentCode(
+                            file,
+                            code,
+                            direction=row[1],
+                            description=row[2],
+                            guidance=row[3],
+                            status_codes_cds=row[4]
+                        )
 
-                if file == "cds_union":
-                    self.document_codes_union[
-                        document_code.code
-                    ] = document_code.as_dict()
-                elif file == "cds_national":
-                    self.document_codes_national[
-                        document_code.code
-                    ] = document_code.as_dict()
+                        self.document_codes[document_code.code] = document_code.as_dict()
 
-                if code not in self.codes_on_govuk:
-                    self.codes_on_govuk.append(code)
+                    except Exception as e:
+                        print(f"Error processing row #{code}: {e}")
 
-    def combine_files(self):
-        print("Combining all data sources")
-        print(len(self.document_codes_union), "Union codes")
-        print(len(self.document_codes_national), "National codes")
+                    if code not in self.codes_on_govuk:
+                        self.codes_on_govuk.append(code)
+            continue
 
-        self.document_codes_all = (
-            self.document_codes_union | self.document_codes_national
-        )
-
-        print(len(self.document_codes_all), "Total document codes")
 
     def write_file(self):
         print("Writing output")
         out_file = open(self.json_output, "w")
-        self.out = self.document_codes_all
+        self.out = self.document_codes
         json.dump(self.out, out_file, indent=4)
         out_file.close()
 
@@ -183,6 +170,7 @@ class Application(object):
         soup = BeautifulSoup(request.text, "lxml")
         filename = ''
 
+        # breakpoint()
         for tag in soup.find_all("a", href=True):
             href = tag["href"]
             if ".ods" in href:

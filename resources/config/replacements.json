@@ -250,5 +250,37 @@
     {
         "from": "\\(see Appendix C10 for definitions\\)",
         "to": ""
+    },
+    {
+        "from": " or ",
+        "to": ", "
+    },
+    {
+        "from": "- Enter the following",
+        "to": "Enter the following"
+    },
+    {
+        "from": "Enter the following -",
+        "to": "Enter the following:"
+    },
+    {
+        "from": "Reg.",
+        "to": "Regulation"
+    },
+    {
+        "from": "reg.",
+        "to": "regulation"
+    },
+    {
+        "from": "- - ",
+        "to": "\t- "
+    },
+    {
+        "from": "-  - ",
+        "to": "\t- "
+    },
+    {
+        "from": "\n\t",
+        "to": "\n"
     }
 ]

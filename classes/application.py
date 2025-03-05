@@ -22,30 +22,12 @@ load_dotenv(".env")
 class Application(object):
     def __init__(self):
         self.resources_folder = os.path.join(os.getcwd(), "resources")
-        self.source_folder = os.path.join(self.resources_folder, "01. source")
-        self.dest_folder = os.path.join(self.resources_folder, "03. dest")
-        self.codes_folder = os.path.join(self.resources_folder, "04. codes")
-        self.missing_folder = os.path.join(self.resources_folder, "05. missing")
-        self.config_folder = os.path.join(self.resources_folder, "06. config")
+        self.source_folder = os.path.join(self.resources_folder, "source")
+        self.config_folder = os.path.join(self.resources_folder, "config")
         self.csv_status_codes = os.path.join(self.config_folder, "status_codes.csv")
 
         func.make_folder(self.resources_folder)
         func.make_folder(self.source_folder)
-        func.make_folder(self.dest_folder)
-        func.make_folder(self.codes_folder)
-        func.make_folder(self.missing_folder)
-
-        d = self.get_today_string()
-        self.json_output = os.path.join(self.dest_folder, "cds_guidance.json")
-        self.dated_folder = os.path.join(self.dest_folder, d)
-        try:
-            os.mkdir(self.dated_folder)
-        except Exception:
-            pass
-
-        self.json_output2 = os.path.join(
-            self.dated_folder, "chief_cds_guidance_{d}.json".format(d=d)
-        )
 
         # URLs
         self.url_union = os.getenv("URL_UNION")
@@ -67,7 +49,7 @@ class Application(object):
             csv_reader = csv.reader(csv_file, delimiter=",")
             for row in csv_reader:
                 status_code = row[0]
-                description = self.cleanse_generic(row[1])
+                description = row[1]
                 self.status_codes[status_code] = description
 
     def get_data(self):
@@ -75,9 +57,6 @@ class Application(object):
 
         self.get_file("cds_union")
         self.get_file("cds_national")
-
-    def write_json(self):
-        self.write_file()
 
     def get_file(self, file):
         print("Getting data from source:", file)
@@ -99,10 +78,10 @@ class Application(object):
                     document_code = DocumentCode(
                         file,
                         code,
-                        direction=row[1],
-                        description=row[2],
-                        guidance=row[3],
-                        status_codes_cds=row[4]
+                        direction=row[1] or '',
+                        description=row[2] or '',
+                        guidance=row[3] or '',
+                        status_codes_cds=row[4] or ''
                     )
 
                     self.document_codes[document_code.code] = document_code.as_dict()
@@ -115,22 +94,11 @@ class Application(object):
 
     def write_file(self):
         print("Writing output")
-        out_file = open(self.json_output, "w")
+        # Ensure file is never None
+        out_file = open(self.DEST_FILE, "w")
         self.out = self.document_codes
         json.dump(self.out, out_file, indent=4)
         out_file.close()
-
-        # Copy to the OTT prototype
-        copyfile(self.json_output, self.DEST_FILE)
-
-        # Copy to the dated folder
-        copyfile(self.json_output, self.json_output2)
-
-    def check(self, array, index):
-        if len(array) > index:
-            return str(array[index])
-        else:
-            return ""
 
     def get_today_string(self):
         return date.today().strftime("%Y-%m-%d")
@@ -144,12 +112,6 @@ class Application(object):
         with open(path, "r") as f:
             self.abbreviations = json.load(f)
 
-    def cleanse_generic(self, s):
-        # breakpoint()
-        for replacement in self.replacements:
-            s = re.sub(replacement["from"], replacement["to"], s)
-        return re.sub(" +", " ", s).strip()
-
     def get_ods_files(self):
         self.cds_national = self.get_ods_file(self.url_national, "national.ods")
         self.cds_union = self.get_ods_file(self.url_union, "union.ods")
@@ -160,16 +122,21 @@ class Application(object):
         }
 
     def get_ods_file(self, url, dest):
-        request = requests.get(url)
+        filename = os.path.join(self.source_folder, dest)
 
+        if os.path.getsize(filename) < 1:
+            print("File not found:", dest)
+            return
+
+        print("Extracting and saving file:", dest, os.path.getsize(filename)/1024,"kB")
+
+        request = requests.get(url)
         soup = BeautifulSoup(request.text, "lxml")
-        filename = ''
 
         for tag in soup.find_all("a", href=True):
             href = tag["href"]
             if ".ods" in href:
                 r = requests.get(href)
-                filename = os.path.join(self.source_folder, dest)
                 with open(filename, "wb") as f:
                     f.write(r.content)
                 return filename

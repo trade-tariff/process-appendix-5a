@@ -18,50 +18,28 @@ class DocumentCode(object):
         self.guidance_cds = ""
         self.url_5b = os.getenv("URL_5B")
 
-        self.protect()
         self.format_guidance()
+        # self.expand_status_codes()
         self.format_all()
         self.format_status_codes()
         self.unprotect()
         self.splice_cds()
 
+    def apply_replacements(self, s):
+        for replacement in g.app.replacements:
+            s = s.replace(replacement["from"], replacement["to"])
+        return " ".join(s.split())
+
     def format_all(self):
-        self.code = g.app.cleanse_generic(self.code)
-        self.direction = g.app.cleanse_generic(self.direction)
-        self.description = g.app.cleanse_generic(self.description)
-        self.guidance = g.app.cleanse_generic(self.guidance)
+        self.code = self.apply_replacements(self.code)
+        self.direction = self.apply_replacements(self.direction)
+        self.description = self.apply_replacements(self.description)
+        self.guidance = self.apply_replacements(self.guidance)
+        self.status_codes_cds = self.apply_replacements(self.status_codes_cds)
 
         self.guidance = "- " + self.guidance.replace("\n", "\n\n- ") + "\n\n"
-        self.guidance = self.guidance.replace("- - ", "\t- ")
-        self.guidance = self.guidance.replace("-  - ", "\t- ")
-        self.guidance = self.guidance.replace("\n\t", "\n")
 
-        self.guidance = self.guidance.replace(
-            "- Enter the following", "Enter the following"
-        )
-        self.guidance = self.guidance.replace(
-            "Enter the following -", "Enter the following:"
-        )
-
-        self.status_codes_cds = g.app.cleanse_generic(self.status_codes_cds)
         self.status_codes_cds = self.status_codes_cds.rstrip(".")
-
-        if self.code == "C505":
-            self.guidance = self.guidance.replace("- ", "")
-
-    def protect(self):
-        self.guidance = re.sub(r"Note yyyy.", "Note yyyytemp_dot", self.guidance)
-        self.guidance = re.sub(r"consignment.", "consignment", self.guidance)
-        self.guidance = re.sub(r"GBCHDyyyy.", "GBCHDyyyytemp_dot", self.guidance)
-        self.guidance = re.sub(
-            r"personal consumption or use ",
-            "personal consumption or use). ",
-            self.guidance,
-        )
-        self.guidance = re.sub(r"\nCUSTOMS SCHEMES", " customs schemes", self.guidance)
-        self.guidance = self.guidance.replace("ATT", "A-T-T")
-        self.guidance = self.guidance.replace("Reg.", "Regulation")
-        self.guidance = self.guidance.replace("reg.", "regulation")
 
     def unprotect(self):
         self.guidance = self.guidance.replace("A-T-T", "ATT")
@@ -97,17 +75,14 @@ class DocumentCode(object):
 
         # Abbreviations
         self.replace_abbreviations()
+        self.expand_status_codes()
 
     def expand_status_codes(self):
-        for sc in g.app.status_codes:
+        for status_code in g.app.status_codes:
             replacement = "\\1<abbr title='{title}'>{status_code}</abbr>\\3".format(
-                title=g.app.status_codes[sc], status_code=sc
+                title=g.app.status_codes[status_code], status_code=status_code
             )
-            replacement2 = "\\1<abbr title='{title}'>{status_code}</abbr>".format(
-                title=g.app.status_codes[sc], status_code=sc
-            )
-            self.guidance = re.sub(r"(\W)(" + sc + r")(\W)", replacement, self.guidance)
-            self.guidance = re.sub(r"(\W)(" + sc + ")$", replacement2, self.guidance)
+            self.guidance = re.sub(r"(\W)(" + status_code + r")(\W|$)", replacement, self.guidance)
 
     def splice_cds(self):
         if self.guidance == "":
@@ -177,5 +152,3 @@ class DocumentCode(object):
         self.guidance = self.guidance.strip(",")
         self.guidance += addendum
         self.guidance = self.guidance.replace("\n\n\n", "\n\n")
-
-        self.expand_status_codes()

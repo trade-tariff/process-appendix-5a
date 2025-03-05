@@ -109,14 +109,6 @@ temp/
 .DS_Store
 
 # Database
-resources/01. source/*.ods
+resources/source/*.ods
 resources/03. dest/20*
-resources/03. dest/cds_guidance.json
-resources/04. codes/codes*
-resources/05. missing/*.json
-resources/05. missing/*.xlsx
-
-# Shortcuts
-p
-
 cds_guidance.json

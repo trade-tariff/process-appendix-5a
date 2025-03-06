@@ -112,8 +112,12 @@ class Application(object):
             self.abbreviations = json.load(f)
 
     def get_ods_files(self):
-        self.cds_national = self.get_ods_file(self.url_national, "national.ods")
-        self.cds_union = self.get_ods_file(self.url_union, "union.ods")
+        try:
+            self.cds_national = self.get_ods_file(self.url_national, "national.ods")
+            self.cds_union = self.get_ods_file(self.url_union, "union.ods")
+        except Exception as e:
+            print(f"Error getting files: {e}")
+            sys.exit(1)
 
         self.filenames = {
             "cds_national": self.cds_national,
@@ -122,10 +126,6 @@ class Application(object):
 
     def get_ods_file(self, url, dest):
         filename = os.path.join(self.source_folder, dest)
-
-        if os.path.getsize(filename) < 1:
-            print("File not found:", dest)
-            return
 
         print("Extracting and saving file:", dest, os.path.getsize(filename)/1024,"kB")
 

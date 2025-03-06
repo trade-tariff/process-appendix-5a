@@ -224,12 +224,12 @@
         "to": "constitutes"
     },
     {
-        "from": "numbered range of document cover ",
-        "to": "numbered range of documents covers "
-    },
-    {
         "from": "exemption'as",
         "to": "exemption' as"
+    },
+    {
+        "from": "cover",
+        "to": "covers"
     },
     {
         "from": "numbered enter the",
@@ -282,5 +282,17 @@
     {
         "from": "\n\t",
         "to": "\n"
-    }
+    },
+    {
+        "from": ",,",
+        "to": ","
+    },
+    {
+        "from": "\n",
+        "to": "\n\n- "
+    },
+    {
+        "from": "- \n\n",
+        "to": ""
+     }
 ]

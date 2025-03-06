@@ -19,10 +19,8 @@ class DocumentCode(object):
         self.url_5b = os.getenv("URL_5B")
 
         self.format_guidance()
-        # self.expand_status_codes()
         self.format_all()
         self.format_status_codes()
-        self.unprotect()
         self.splice_cds()
 
     def apply_replacements(self, s):
@@ -34,44 +32,12 @@ class DocumentCode(object):
         self.code = self.apply_replacements(self.code)
         self.direction = self.apply_replacements(self.direction)
         self.description = self.apply_replacements(self.description)
-        self.guidance = self.apply_replacements(self.guidance)
+        self.guidance = "- " + self.apply_replacements(self.guidance)
         self.status_codes_cds = self.apply_replacements(self.status_codes_cds)
-
-        self.guidance = "- " + self.guidance.replace("\n", "\n\n- ") + "\n\n"
 
         self.status_codes_cds = self.status_codes_cds.rstrip(".")
 
-    def unprotect(self):
-        self.guidance = self.guidance.replace("A-T-T", "ATT")
-        self.guidance = self.guidance.replace("- \n\n", "")
-
-        # Remove \n at the end
-        self.guidance = re.sub(r"\n\n$", "", self.guidance)
-        self.guidance = re.sub(r"\n$", "", self.guidance)
-
     def format_guidance(self):
-        # This runs before all the replacements
-        self.guidance = re.sub(r"i\.e\. ", ", e.g. ", self.guidance)
-        self.guidance = re.sub(r", , e\.g\. ", ", e.g. ", self.guidance)
-        self.guidance = re.sub(r"\. ", ".\n", self.guidance)
-        self.guidance = re.sub(r"\n ", "\n", self.guidance)
-        self.guidance = re.sub(r"\n\n", "\n", self.guidance)
-        self.guidance = re.sub(r"e\.g\.\n", "e.g. ", self.guidance)
-        self.guidance = re.sub(r"No\.\n", "No. ", self.guidance)
-        self.guidance = re.sub(r" ,", ",", self.guidance)
-
-        # Grammar issues
-        self.guidance = re.sub(
-            r"range of certificates cover the goods",
-            "range of certificates covers the goods,",
-            self.guidance,
-        )
-        self.guidance = re.sub(
-            r"range of documents cover the goods",
-            "range of documents covers the goods,",
-            self.guidance,
-        )
-        self.guidance = re.sub(r"goods insert", "goods, insert", self.guidance)
 
         # Abbreviations
         self.replace_abbreviations()

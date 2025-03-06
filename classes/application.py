@@ -57,6 +57,7 @@ class Application(object):
 
         self.get_file("cds_union")
         self.get_file("cds_national")
+        print(len(self.document_codes), "Document codes")
 
     def get_file(self, file):
         print("Getting data from source:", file)
@@ -94,10 +95,8 @@ class Application(object):
 
     def write_file(self):
         print("Writing output")
-        # Ensure file is never None
         out_file = open(self.DEST_FILE, "w")
-        self.out = self.document_codes
-        json.dump(self.out, out_file, indent=4)
+        json.dump(self.document_codes, out_file, indent=4)
         out_file.close()
 
     def get_today_string(self):

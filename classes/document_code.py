@@ -19,8 +19,8 @@ class DocumentCode(object):
         self.url_5b = os.getenv("URL_5B")
 
         self.format_attributes()
-        self.expand_status_codes()
         self.expand_guidance()
+        self.expand_status_codes()
         self.set_guidance_cds()
 
     def format_attributes(self):
@@ -34,10 +34,11 @@ class DocumentCode(object):
 
     def expand_status_codes(self):
         for status_code in g.app.status_codes:
-            replacement = "\\1<abbr title='{title}'>{status_code}</abbr>\\3".format(
-                title=g.app.status_codes[status_code], status_code=status_code
-            )
-            self.guidance = re.sub(r"(\W)(" + status_code + r")(\W|$)", replacement, self.guidance)
+            title=g.app.status_codes[status_code]
+            status_code=status_code
+            replacement = f"<abbr title='{title}'>{status_code}</abbr>"
+            pattern = rf'\b{re.escape(status_code)}\b'
+            self.guidance = re.sub(pattern, replacement, self.guidance)
 
     def set_guidance_cds(self):
         self.guidance_cds = "No additional information is available." if self.guidance == "" else self.guidance
@@ -62,14 +63,12 @@ class DocumentCode(object):
                 self.status_codes_cds = tmp[0]
                 addendum = splitter + tmp[1]
 
-            if len(self.status_codes_cds) == 1 and self.status_codes_cds[0] == "":
-                self.status_codes_cds = []
-
             else:
                 addendum = (
                     "\n- Use one of the following [document status codes]("
                     + self.url_5b
                     + "): "
+                    + self.status_codes_cds
                 )
         self.guidance += addendum
 

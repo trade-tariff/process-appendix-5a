@@ -57,19 +57,13 @@ class DocumentCode(object):
             addendum = "\n- No document status code is required."
 
         else:
-            splitter = "*Please note"
-            if splitter in self.status_codes_cds:
-                tmp = self.status_codes_cds.split(splitter)
-                self.status_codes_cds = tmp[0]
-                addendum = splitter + tmp[1]
+            addendum = (
+                "\n- Use one of the following [document status codes]("
+                + self.url_5b
+                + "): "
+                + self.status_codes_cds
+            )
 
-            else:
-                addendum = (
-                    "\n- Use one of the following [document status codes]("
-                    + self.url_5b
-                    + "): "
-                    + self.status_codes_cds
-                )
         self.guidance += addendum
 
     def apply_replacements(self, s):

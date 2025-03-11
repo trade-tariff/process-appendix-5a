@@ -1,1 +1,0 @@
-Folder for destination files, created in subfolders by date

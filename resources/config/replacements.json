@@ -224,12 +224,12 @@
         "to": "constitutes"
     },
     {
-        "from": "numbered range of document cover ",
-        "to": "numbered range of documents covers "
-    },
-    {
         "from": "exemption'as",
         "to": "exemption' as"
+    },
+    {
+        "from": "cover",
+        "to": "covers"
     },
     {
         "from": "numbered enter the",
@@ -250,5 +250,49 @@
     {
         "from": "\\(see Appendix C10 for definitions\\)",
         "to": ""
-    }
+    },
+    {
+        "from": " or ",
+        "to": ", "
+    },
+    {
+        "from": "- Enter the following",
+        "to": "Enter the following"
+    },
+    {
+        "from": "Enter the following -",
+        "to": "Enter the following:"
+    },
+    {
+        "from": "Reg.",
+        "to": "Regulation"
+    },
+    {
+        "from": "reg.",
+        "to": "regulation"
+    },
+    {
+        "from": "- - ",
+        "to": "\t- "
+    },
+    {
+        "from": "-  - ",
+        "to": "\t- "
+    },
+    {
+        "from": "\n\t",
+        "to": "\n"
+    },
+    {
+        "from": ",,",
+        "to": ","
+    },
+    {
+        "from": "\n",
+        "to": "\n\n- "
+    },
+    {
+        "from": "- \n\n",
+        "to": ""
+     }
 ]

@@ -133,7 +133,7 @@ class Application(object):
                 with open(filename, "wb") as f:
                     f.write(r.content)
 
-                print("Extracting and saving file:", dest, os.path.getsize(filename)/1024,"kB")
+                print("Extracting and saving file:", dest, os.path.getsize(filename) / 1024, "kB")
                 return filename
 
     def upload_file_to_s3(self):

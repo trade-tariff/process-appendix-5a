@@ -5,7 +5,7 @@ import os
 
 class DocumentCode(object):
     def __init__(
-        self, file, code, direction, description, guidance, status_codes_cds, level = ''
+        self, file, code, direction, description, guidance, status_codes_cds, level=''
     ):
         self.file = file
         self.code = code
@@ -43,7 +43,7 @@ class DocumentCode(object):
         self.guidance_cds = "No additional information is available." if self.guidance == "" else self.guidance
 
     def as_dict(self):
-        return { "guidance_cds": self.guidance_cds }
+        return {"guidance_cds": self.guidance_cds}
 
     def expand_guidance(self):
         addendum = ""

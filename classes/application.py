@@ -1,15 +1,12 @@
 from bs4 import BeautifulSoup
 from datetime import date
 from dotenv import load_dotenv
-from glob import glob
 from pyexcel_ods import get_data
-from shutil import copyfile
 from botocore.exceptions import NoCredentialsError
 import boto3
 import csv
 import json
 import os
-import re
 import sys
 import requests
 

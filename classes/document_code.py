@@ -34,8 +34,8 @@ class DocumentCode(object):
 
     def expand_status_codes(self):
         for status_code in g.app.status_codes:
-            title=g.app.status_codes[status_code]
-            status_code=status_code
+            title = g.app.status_codes[status_code]
+            status_code = status_code
             replacement = f"<abbr title='{title}'>{status_code}</abbr>"
             pattern = rf'\b{re.escape(status_code)}\b'
             self.guidance = re.sub(pattern, replacement, self.guidance)

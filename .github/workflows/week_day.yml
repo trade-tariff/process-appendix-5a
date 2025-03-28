@@ -6,10 +6,9 @@ on:
 
 jobs:
   produce-appendix-5a-development:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     container:
-      image: python:3.10.7
+      image: python:3.11.2
     env:
       AWS_BUCKET_NAME: "trade-tariff-persistence-844815912454"
 
@@ -44,10 +43,9 @@ jobs:
     
 
   produce-appendix-5a-staging:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     container:
-      image: python:3.10.7
+      image: python:3.11.2
     env:
       AWS_BUCKET_NAME: "trade-tariff-persistence-451934005581"
 
@@ -81,10 +79,9 @@ jobs:
         python process.py
 
   produce-appendix-5a-production:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     container:
-      image: python:3.10.7
+      image: python:3.11.2
     env:
       AWS_BUCKET_NAME: "trade-tariff-persistence-382373577178"
 

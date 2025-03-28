@@ -1,0 +1,57 @@
+name: trade-tariff/process-appendix-5a/ci
+on:
+  push:
+    branches-ignore:
+    - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11.2
+    steps:
+    - uses: actions/checkout@v4.1.0
+    - name: install flake8
+      run: pip install flake8
+    - name: run flake8
+      run: flake8 .
+  
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11.2
+    env:
+      AWS_BUCKET_NAME: "trade-tariff-persistence-844815912454"
+
+    steps:
+    - uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::844815912454:role/GithubActions-Appendix5a-Role
+        aws-region: eu-west-2
+    - uses: actions/checkout@v4.1.0
+
+    - name: restore_cache
+      uses: actions/cache@v3
+      with:
+        path: venv
+        key: deps-1.0.0-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          deps-1.0.0-
+
+    - name: Setup environment
+      shell: bash
+      run: |-
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Run process Script
+      shell: bash
+      run: |-
+        touch .env
+        source venv/bin/activate
+        python process.py

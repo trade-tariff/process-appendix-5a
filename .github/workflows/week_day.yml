@@ -1,0 +1,61 @@
+name: trade-tariff/process-appendix-5a/week_day
+
+on:
+  schedule:
+    - cron: "00 21 * * 1,2,3,4,5"
+
+jobs:
+  produce-appendix-5a:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11.2
+
+    strategy:
+      matrix:
+        environment: 
+          - development
+          - staging
+          - production
+        include:
+          - environment: development
+            aws_bucket_name: "trade-tariff-persistence-844815912454"
+            role_arn: "arn:aws:iam::844815912454:role/GithubActions-Appendix5a-Role"
+          - environment: staging
+            aws_bucket_name: "trade-tariff-persistence-451934005581"
+            role_arn: "arn:aws:iam::451934005581:role/GithubActions-Appendix5a-Role"
+          - environment: production
+            aws_bucket_name: "trade-tariff-persistence-382373577178"
+            role_arn: "arn:aws:iam::382373577178:role/GithubActions-Appendix5a-Role"
+
+    env:
+      AWS_BUCKET_NAME: ${{ matrix.aws_bucket_name }}
+
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ matrix.role_arn }}
+          aws-region: eu-west-2
+
+      - uses: actions/checkout@v4.1.0
+
+      - name: restore_cache
+        uses: actions/cache@v3
+        with:
+          path: venv
+          key: deps-1.0.0-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            deps-1.0.0-
+
+      - name: Setup environment
+        shell: bash
+        run: |-
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run process Script
+        shell: bash
+        run: |-
+          touch .env
+          source venv/bin/activate
+          python process.py

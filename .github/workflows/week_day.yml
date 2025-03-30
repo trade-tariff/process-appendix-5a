@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "00 21 * * 1,2,3,4,5"
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   produce-appendix-5a:
     runs-on: ubuntu-latest

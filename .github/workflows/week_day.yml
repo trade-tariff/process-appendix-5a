@@ -1,6 +1,8 @@
 name: trade-tariff/process-appendix-5a/week_day
 
 on:
+  workflow_dispatch:
+  
   schedule:
     - cron: "00 21 * * 1,2,3,4,5"
 

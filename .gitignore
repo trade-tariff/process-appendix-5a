@@ -109,18 +109,6 @@ temp/
 .DS_Store
 
 # Database
-resources/01. source/20*
-resources/01. source/latest/*.ods
-resources/02. overlays/cds/*.md
-resources/02. overlays/cds archive
-resources/02. overlays/chief/*.md
+resources/source/*.ods
 resources/03. dest/20*
-resources/03. dest/chief_cds_guidance.json
-resources/04. codes/codes*
-resources/05. missing/*.json
-resources/05. missing/*.xlsx
-
-# Shortcuts
-p
-
-chief_cds_guidance.json
+cds_guidance.json

@@ -1,5 +1,5 @@
 
-XlsxWriter==3.2.2
+XlsxWriter==3.2.3
 beautifulsoup4==4.13.4
 boto3==1.37.38
 defusedxml==0.7.1

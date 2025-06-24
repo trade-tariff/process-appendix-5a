@@ -1,17 +1,18 @@
-from bs4 import BeautifulSoup
-from datetime import date
-from dotenv import load_dotenv
-from pyexcel_ods import get_data
-from botocore.exceptions import NoCredentialsError
-import boto3
 import csv
 import json
 import os
 import sys
-import requests
+from datetime import date
 
-from classes.document_code import DocumentCode
+import boto3
+import requests
+from botocore.exceptions import NoCredentialsError
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from pyexcel_ods import get_data
+
 import classes.functions as func
+from classes.document_code import DocumentCode
 
 load_dotenv(".env")
 
@@ -76,10 +77,10 @@ class Application(object):
                     document_code = DocumentCode(
                         file,
                         code,
-                        direction=row[1] or '',
-                        description=row[2] or '',
-                        guidance=row[3] or '',
-                        status_codes_cds=row[4] or ''
+                        direction=row[1] or "",
+                        description=row[2] or "",
+                        guidance=row[3] or "",
+                        status_codes_cds=row[4] or "",
                     )
 
                     self.document_codes[document_code.code] = document_code.as_dict()
@@ -88,7 +89,9 @@ class Application(object):
                     print(f"Error processing row #{code}: {e}")
                     continue
             else:
-                print(f"No data for code: {code}, missing values are defaulted to empty strings")
+                print(
+                    f"No data for code: {code}, missing values are defaulted to empty strings"
+                )
 
     def write_file(self):
         print("Writing output")
@@ -99,11 +102,7 @@ class Application(object):
     def get_today_string(self):
         return date.today().strftime("%Y-%m-%d")
 
-    def setup_replacements_and_abbreviations(self):
-        path = os.path.join(self.config_folder, "replacements.json")
-        with open(path, "r") as f:
-            self.replacements = json.load(f)
-
+    def setup_abbreviations(self):
         path = os.path.join(self.config_folder, "abbreviations.json")
         with open(path, "r") as f:
             self.abbreviations = json.load(f)
@@ -133,7 +132,12 @@ class Application(object):
                 with open(filename, "wb") as f:
                     f.write(r.content)
 
-                print("Extracting and saving file:", dest, os.path.getsize(filename) / 1024, "kB")
+                print(
+                    "Extracting and saving file:",
+                    dest,
+                    os.path.getsize(filename) / 1024,
+                    "kB",
+                )
                 return filename
 
     def upload_file_to_s3(self):

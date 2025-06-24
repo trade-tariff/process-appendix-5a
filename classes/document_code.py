@@ -1,11 +1,12 @@
-import re
-import classes.globals as g
 import os
+import re
+
+import classes.globals as g
 
 
 class DocumentCode(object):
     def __init__(
-        self, file, code, direction, description, guidance, status_codes_cds, level=''
+        self, file, code, direction, description, guidance, status_codes_cds, level=""
     ):
         self.file = file
         self.code = code
@@ -25,10 +26,6 @@ class DocumentCode(object):
 
     def format_attributes(self):
         self.code = self.code.strip()
-        self.direction = self.apply_replacements(self.direction)
-        self.description = self.apply_replacements(self.description)
-        self.guidance = "- " + self.apply_replacements(self.guidance)
-        self.status_codes_cds = self.apply_replacements(self.status_codes_cds)
 
         self.apply_abbreviations()
 
@@ -36,12 +33,16 @@ class DocumentCode(object):
         for status_code in g.app.status_codes:
             title = g.app.status_codes[status_code]
             status_code = status_code
-            replacement = f"<abbr title='{title}'>{status_code}</abbr>"
-            pattern = rf'\b{re.escape(status_code)}\b'
-            self.guidance = re.sub(pattern, replacement, self.guidance)
+            abbreviated = f"<abbr title='{title}'>{status_code}</abbr>"
+            pattern = rf"\b{re.escape(status_code)}\b"
+            self.guidance = re.sub(pattern, abbreviated, self.guidance)
 
     def set_guidance_cds(self):
-        self.guidance_cds = "No additional information is available." if self.guidance == "" else self.guidance
+        self.guidance_cds = (
+            "No additional information is available."
+            if self.guidance == ""
+            else self.guidance
+        )
 
     def as_dict(self):
         return {"guidance_cds": self.guidance_cds}
@@ -65,11 +66,6 @@ class DocumentCode(object):
             )
 
         self.guidance += addendum
-
-    def apply_replacements(self, s):
-        for replacement in g.app.replacements:
-            s = s.replace(replacement["from"], replacement["to"])
-        return " ".join(s.split())
 
     def apply_abbreviations(self):
         for item in g.app.abbreviations:

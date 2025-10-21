@@ -4,7 +4,7 @@ beautifulsoup4==4.14.2
 boto3==1.40.55
 defusedxml==0.7.1
 lxml==6.0.2
-psycopg2-binary==2.9.10
+psycopg2-binary==2.9.11
 pyexcel-io==0.6.7
 pyexcel-ods==0.6.0
 python-dotenv==1.1.1

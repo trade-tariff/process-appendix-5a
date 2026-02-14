@@ -112,3 +112,4 @@ temp/
 resources/source/*.ods
 resources/03. dest/20*
 cds_guidance.json
+.envrc

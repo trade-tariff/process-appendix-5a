@@ -3,7 +3,7 @@ XlsxWriter==3.2.9
 beautifulsoup4==4.14.3
 boto3==1.42.84
 defusedxml==0.7.1
-lxml==6.0.2
+lxml==6.0.4
 psycopg2-binary==2.9.11
 pyexcel-io==0.6.7
 pyexcel-ods==0.6.0

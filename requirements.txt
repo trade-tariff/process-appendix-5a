@@ -5,7 +5,7 @@ boto3==1.43.36
 defusedxml==0.7.1
 lxml==6.1.1
 psycopg2-binary==2.9.12
-pyexcel-io==0.6.7
+pyexcel-io==0.6.8
 pyexcel-ods==0.6.0
 python-dotenv==1.2.2
 requests==2.34.2

@@ -1,19 +1,53 @@
 # Process Appendix 5a data
 
-## Implementation steps
+This Python tool downloads the union and national Appendix 5a spreadsheets from
+GOV.UK. It converts document codes, status codes and guidance into JSON for the
+Trade Tariff service, then uploads the result to S3.
 
-- Create and activate a virtual environment, e.g.
+## Set up locally
 
-  - `python3 -m venv venv/`
-  - `source venv/bin/activate`
+Use Python 3 and an isolated virtual environment:
 
-- Install necessary Python modules via `pip3 install -r requirements.txt`
+```sh
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install -r requirements.txt
+```
 
-## Usage
+The application loads `.env`. Set `URL_UNION` and `URL_NATIONAL` to the GOV.UK
+pages containing the ODS downloads, and `DEST_FILE` to the local output path.
+Set `AWS_BUCKET_NAME` explicitly to the approved destination. Keep credentials
+outside Git.
 
-### To pull the necessary data from gov.uk:
-`python3 process.py`
+See [classes/application.py](classes/application.py) for the input processing
+and [resources/config/](resources/config/) for status codes and abbreviations.
 
-## How it works
+## Run the processor
 
-Documentation can be found [here](https://transformuk.atlassian.net/wiki/spaces/HOTT/pages/21706178577/3.1.13+Appendix+5a+updates+cds+guidance+and+chief+guidance#Updating-our-data-from-Appendix-5a).
+After confirming the source URLs, output path, AWS account and destination:
+
+```sh
+python3 process.py
+```
+
+This is not a read-only preview. The command downloads files, writes JSON and
+uploads it as `config/cds_guidance.json` in the selected bucket. It has no
+command-line dry-run mode. Do not run it against a shared bucket without approval.
+
+## Check changes
+
+CI runs `flake8 .` and an integration run that publishes to the development
+bucket. That integration needs approved AWS access; it is not an offline unit
+test. See [CI configuration](.github/workflows/ci.yml). A non-main branch push
+can trigger that integration.
+
+## Contribute
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the fork workflow, checks and private
+security reporting.
+
+## Licence
+
+The code and associated documentation use the [MIT licence](LICENCE.md), with
+Crown copyright (HM Revenue & Customs). Source spreadsheets and other data
+retain their own terms.
